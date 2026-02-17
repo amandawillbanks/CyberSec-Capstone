@@ -246,7 +246,7 @@ export default function CapstoneMVP() {
     <div style={styles.page}>
       <header style={styles.header}>
         <div>
-          <div style={styles.title}>CyberSecurity Capstone</div>
+          <div style={styles.title}>CyberSecurity Lab</div>
           <div style={styles.subTitle}>
             Globe + Hosts + Attacker Escalation + Mitigations
           </div>
