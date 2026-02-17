@@ -1,0 +1,71 @@
+/* ── Global reset & cyberpunk base ─────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --cyan:    #00fff7;
+  --magenta: #ff003c;
+  --yellow:  #ffcc00;
+  --green:   #00ff88;
+  --purple:  #8855ff;
+  --bg:      #060a0f;
+
+  font-family: 'Courier New', Consolas, 'Lucida Console', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #9ab4c0;
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  display: block;
+}
+
+/* ── Scrollbars ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #060a0f; }
+::-webkit-scrollbar-thumb { background: rgba(0,255,247,0.2); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,255,247,0.45); }
+
+/* ── Button base ───────────────────────────────────────────────────────── */
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+button:focus-visible {
+  outline: 1px solid #00fff7;
+  outline-offset: 2px;
+}
+
+/* ── Pulse animations ──────────────────────────────────────────────────── */
+@keyframes pulse-red {
+  0%, 100% { box-shadow: 0 0 6px rgba(255,0,60,0.7),  inset 0 0 6px rgba(255,0,60,0.15); }
+  50%       { box-shadow: 0 0 18px rgba(255,0,60,1),   inset 0 0 14px rgba(255,0,60,0.3); }
+}
+@keyframes pulse-yellow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255,204,0,0.6),  inset 0 0 4px rgba(255,204,0,0.1); }
+  50%       { box-shadow: 0 0 14px rgba(255,204,0,0.9), inset 0 0 10px rgba(255,204,0,0.25); }
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.status-compromised { animation: pulse-red    1.1s ease-in-out infinite; }
+.status-warning     { animation: pulse-yellow 1.7s ease-in-out infinite; }
+.blink              { animation: blink 1s step-end infinite; }
