@@ -563,7 +563,7 @@ const styles = {
     textShadow: `0 0 12px rgba(0,255,247,0.5)`,
   },
   globeFrame: {
-    width: "min(100%, 560px)",
+    width: "min(100%, 570px)",
     aspectRatio: "1 / 1",
     margin: "0 auto",
     border: `1px solid rgba(0,255,247,0.2)`,
