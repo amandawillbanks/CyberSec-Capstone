@@ -7,6 +7,7 @@ import {
   makeInitialHosts,
   applyMitigationPure,
   stepSimulationPure,
+  MITIGATION_APPLY_TIMES,
 } from "./sim/gameEngine.js";
 
 export default function CapstoneMVP() {
@@ -261,20 +262,44 @@ export default function CapstoneMVP() {
                 <div style={styles.buttonGrid}>
                   {selectedVuln.mitigations.map((m) => {
                     const already = selectedHost.appliedMitigations.includes(m.id);
+                    const pending = selectedHost.pendingMitigations?.find((p) => p.id === m.id);
+                    const isPending = !!pending;
+                    const stage = VULNS[selectedHost.vulnId]?.stages[selectedHost.stageIndex];
+                    const isPenalty = stage?.penaltyMitigations?.includes(m.id);
+                    const disabled = already || isPending;
                     return (
                       <button
                         key={m.id}
-                        disabled={already}
+                        disabled={disabled}
                         onClick={() => applyMitigation(selectedHost.id, m.id)}
                         style={{
                           ...styles.actionBtn,
-                          opacity: already ? 0.45 : 1,
-                          cursor: already ? "not-allowed" : "pointer",
-                          borderLeftColor: already ? "rgba(0,255,247,0.15)" : "rgba(0,255,247,0.5)",
+                          opacity: disabled ? 0.5 : 1,
+                          cursor: disabled ? "not-allowed" : "pointer",
+                          borderLeftColor: already
+                            ? "rgba(0,255,247,0.15)"
+                            : isPending
+                            ? C.yellow
+                            : isPenalty
+                            ? "rgba(255,0,60,0.4)"
+                            : "rgba(0,255,247,0.5)",
+                          background: isPenalty && !already && !isPending
+                            ? "rgba(255,0,60,0.04)"
+                            : "rgba(0,255,247,0.04)",
                         }}
                       >
-                        <div style={styles.actionLabel}>{m.label}</div>
-                        {!already && <div style={styles.actionMeta}>+{m.points} pts</div>}
+                        <div style={styles.actionLabel}>
+                          {isPending ? `⏳ ${pending.timeLeft}s…` : m.label}
+                        </div>
+                        {!already && !isPending && !isPenalty && (
+                          <div style={styles.actionMeta}>+{m.points} pts · {MITIGATION_APPLY_TIMES[m.id] ?? 4}s</div>
+                        )}
+                        {!already && !isPending && isPenalty && (
+                          <div style={{ ...styles.actionMeta, color: C.red }}>⚠ wrong tool</div>
+                        )}
+                        {isPending && (
+                          <div style={{ ...styles.actionMeta, color: C.yellow }}>applying…</div>
+                        )}
                       </button>
                     );
                   })}

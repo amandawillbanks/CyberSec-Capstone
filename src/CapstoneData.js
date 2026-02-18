@@ -18,6 +18,7 @@ export const VULNS = {
           { label: "Harvest browser tokens", mitreId: "T1539"     },
         ],
         requiredMitigationsAnyOf: ["quarantine"],
+        penaltyMitigations: ["reimage", "restore_backup", "isolate_vlan"],
       },
       {
         stage: 1,
@@ -29,6 +30,7 @@ export const VULNS = {
           { label: "Disable AV",         mitreId: "T1562.001" },
         ],
         requiredMitigationsAnyOf: ["quarantine", "isolate_vlan"],
+        penaltyMitigations: ["restore_backup"],
       },
       {
         stage: 2,
@@ -40,6 +42,7 @@ export const VULNS = {
           { label: "Token impersonation", mitreId: "T1134"     },
         ],
         requiredMitigationsAnyOf: ["quarantine", "block_lateral", "reimage"],
+        penaltyMitigations: ["restore_backup"],
         maySpread: true,
       },
       {
@@ -52,6 +55,7 @@ export const VULNS = {
           { label: "Extort",               mitreId: "T1491" },
         ],
         requiredMitigationsAnyOf: ["reimage", "restore_backup"],
+        penaltyMitigations: [],
       },
     ],
     mitigations: [
@@ -83,6 +87,7 @@ export const VULNS = {
           { label: "Enumerate usernames",  mitreId: "T1589.003" },
         ],
         requiredMitigationsAnyOf: ["disable_rdp", "vpn_only"],
+        penaltyMitigations: ["reimage"],
       },
       {
         stage: 1,
@@ -93,6 +98,7 @@ export const VULNS = {
           { label: "Credential stuffing",  mitreId: "T1110.004" },
         ],
         requiredMitigationsAnyOf: ["disable_rdp", "mfa", "block_ip"],
+        penaltyMitigations: ["reimage"],
       },
       {
         stage: 2,
@@ -104,6 +110,7 @@ export const VULNS = {
           { label: "Run PowerShell",       mitreId: "T1059.001" },
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "reimage"],
+        penaltyMitigations: ["vpn_only"],
         maySpread: true,
       },
       {
@@ -116,6 +123,7 @@ export const VULNS = {
           { label: "Pivot to file shares",mitreId: "T1039"     },
         ],
         requiredMitigationsAnyOf: ["reimage"],
+        penaltyMitigations: ["vpn_only", "block_ip"],
       },
     ],
     mitigations: [
@@ -146,6 +154,7 @@ export const VULNS = {
           { label: "Killing backup services",     mitreId: "T1562" },
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "quarantine"],
+        penaltyMitigations: ["rotate_creds", "run_edr"],
       },
       {
         stage: 1,
@@ -157,6 +166,7 @@ export const VULNS = {
           { label: "Encrypt network drives",   mitreId: "T1486" },
         ],
         requiredMitigationsAnyOf: ["restore_backup", "reimage"],
+        penaltyMitigations: ["rotate_creds"],
       },
       {
         stage: 2,
@@ -168,6 +178,7 @@ export const VULNS = {
           { label: "Demand cryptocurrency payment",      mitreId: "T1486" },
         ],
         requiredMitigationsAnyOf: ["restore_backup", "reimage"],
+        penaltyMitigations: [],
         maySpread: true,
       },
     ],
@@ -198,6 +209,7 @@ export const VULNS = {
           { label: "Memory dump in progress",   mitreId: "T1003.001" },
         ],
         requiredMitigationsAnyOf: ["run_edr", "mfa"],
+        penaltyMitigations: ["restore_backup", "reimage"],
       },
       {
         stage: 1,
@@ -209,6 +221,7 @@ export const VULNS = {
           { label: "Kerberoasting tickets",  mitreId: "T1558.003" },
         ],
         requiredMitigationsAnyOf: ["rotate_creds", "block_lateral"],
+        penaltyMitigations: ["restore_backup"],
       },
       {
         stage: 2,
@@ -220,6 +233,7 @@ export const VULNS = {
           { label: "Access sensitive data stores",     mitreId: "T1213"  },
         ],
         requiredMitigationsAnyOf: ["rotate_creds", "reimage"],
+        penaltyMitigations: ["restore_backup"],
         maySpread: true,
       },
     ],
@@ -250,6 +264,7 @@ export const VULNS = {
           { label: "Check ADMIN$ access",       mitreId: "T1021.002" },
         ],
         requiredMitigationsAnyOf: ["block_lateral", "isolate_vlan"],
+        penaltyMitigations: ["reimage", "restore_backup"],
       },
       {
         stage: 1,
@@ -261,6 +276,7 @@ export const VULNS = {
           { label: "Execute via PsExec",     mitreId: "T1569.002" },
         ],
         requiredMitigationsAnyOf: ["block_lateral", "quarantine"],
+        penaltyMitigations: ["restore_backup"],
       },
       {
         stage: 2,
@@ -272,6 +288,7 @@ export const VULNS = {
           { label: "Expanding access to more systems",    mitreId: "T1021.002" },
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "reimage"],
+        penaltyMitigations: ["restore_backup"],
         maySpread: true,
       },
     ],
@@ -302,6 +319,7 @@ export const VULNS = {
           { label: "Beacon to attacker C2",         mitreId: "T1071"     },
         ],
         requiredMitigationsAnyOf: ["quarantine", "notify_soc"],
+        penaltyMitigations: ["rotate_creds"],
       },
       {
         stage: 1,
@@ -313,6 +331,7 @@ export const VULNS = {
           { label: "Steal code signing keys",      mitreId: "T1552"     },
         ],
         requiredMitigationsAnyOf: ["reimage", "rotate_creds"],
+        penaltyMitigations: ["run_edr"],
       },
       {
         stage: 2,
@@ -324,6 +343,7 @@ export const VULNS = {
           { label: "Persist across software updates",   mitreId: "T1554" },
         ],
         requiredMitigationsAnyOf: ["reimage", "restore_backup"],
+        penaltyMitigations: ["run_edr"],
         maySpread: true,
       },
     ],
@@ -355,6 +375,7 @@ export const VULNS = {
           { label: "Directory traversal",     mitreId: "T1190" },
         ],
         requiredMitigationsAnyOf: ["waf_block", "patch_app"],
+        penaltyMitigations: ["reimage", "isolate_vlan"],
       },
       {
         stage: 1,
@@ -366,6 +387,7 @@ export const VULNS = {
           { label: "Malicious file upload",          mitreId: "T1505.003" },
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "patch_app"],
+        penaltyMitigations: ["restore_backup"],
       },
       {
         stage: 2,
@@ -377,6 +399,7 @@ export const VULNS = {
           { label: "Pivot to internal network",          mitreId: "T1021"     },
         ],
         requiredMitigationsAnyOf: ["reimage", "isolate_vlan"],
+        penaltyMitigations: ["restore_backup"],
         maySpread: true,
       },
     ],
@@ -407,6 +430,7 @@ export const VULNS = {
           { label: "Map IAM role policies",       mitreId: "T1526"     },
         ],
         requiredMitigationsAnyOf: ["fix_acl", "notify_soc"],
+        penaltyMitigations: ["reimage", "quarantine"],
       },
       {
         stage: 1,
@@ -418,6 +442,7 @@ export const VULNS = {
           { label: "API key material exposed",   mitreId: "T1552.007" },
         ],
         requiredMitigationsAnyOf: ["fix_acl", "rotate_creds"],
+        penaltyMitigations: ["reimage", "quarantine"],
       },
       {
         stage: 2,
@@ -429,6 +454,7 @@ export const VULNS = {
           { label: "Launch rogue cloud instances",   mitreId: "T1578.002" },
         ],
         requiredMitigationsAnyOf: ["rotate_creds", "mfa"],
+        penaltyMitigations: ["reimage", "quarantine"],
         maySpread: true,
       },
     ],
@@ -459,6 +485,7 @@ export const VULNS = {
           { label: "Accessing restricted data",     mitreId: "T1213" },
         ],
         requiredMitigationsAnyOf: ["run_edr", "notify_soc"],
+        penaltyMitigations: ["revoke_access"],
       },
       {
         stage: 1,
@@ -470,6 +497,7 @@ export const VULNS = {
           { label: "USB data transfer",              mitreId: "T1052.001" },
         ],
         requiredMitigationsAnyOf: ["revoke_access", "rotate_creds"],
+        penaltyMitigations: [],
       },
       {
         stage: 2,
@@ -481,6 +509,7 @@ export const VULNS = {
           { label: "Data sold to competitor",          mitreId: "T1567"  },
         ],
         requiredMitigationsAnyOf: ["revoke_access", "quarantine"],
+        penaltyMitigations: [],
       },
     ],
     mitigations: [
@@ -510,6 +539,7 @@ export const VULNS = {
           { label: "DNS/NTP amplification attack",mitreId: "T1498.002" },
         ],
         requiredMitigationsAnyOf: ["rate_limit", "cdn_mitigation"],
+        penaltyMitigations: ["run_edr", "isolate_vlan"],
       },
       {
         stage: 1,
@@ -521,6 +551,7 @@ export const VULNS = {
           { label: "HTTP flood (Layer 7)",        mitreId: "T1499.003" },
         ],
         requiredMitigationsAnyOf: ["cdn_mitigation", "block_ip"],
+        penaltyMitigations: ["run_edr"],
       },
       {
         stage: 2,
@@ -532,6 +563,7 @@ export const VULNS = {
           { label: "SLA breach imminent",       mitreId: "T1499.003" },
         ],
         requiredMitigationsAnyOf: ["cdn_mitigation", "rate_limit"],
+        penaltyMitigations: ["run_edr"],
       },
     ],
     mitigations: [
