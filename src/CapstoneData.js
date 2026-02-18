@@ -19,6 +19,11 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["quarantine"],
         penaltyMitigations: ["reimage", "restore_backup", "isolate_vlan"],
+        penaltyReasons: {
+          reimage: "Reimaging destroys forensic evidence before we've confirmed full scope. The threat is still active — quarantine the endpoint first, then investigate before wiping.",
+          restore_backup: "Restoring from backup is premature — malware is still executing and could immediately reinfect a restored image. Isolate the host first.",
+          isolate_vlan: "Isolating the entire subnet is disproportionate for one compromised host. It disrupts all business traffic. Quarantine only the affected endpoint instead.",
+        },
       },
       {
         stage: 1,
@@ -31,6 +36,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["quarantine", "isolate_vlan"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "Persistence is already established — a restore doesn't remove the active backdoor or scheduled tasks. Quarantine or isolate first, then wipe and restore.",
+        },
       },
       {
         stage: 2,
@@ -43,6 +51,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["quarantine", "block_lateral", "reimage"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "Lateral movement is already underway across multiple hosts. A single restore is too slow and doesn't stop the spread — block lateral paths and isolate first.",
+        },
         maySpread: true,
       },
       {
@@ -88,6 +99,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["disable_rdp", "vpn_only"],
         penaltyMitigations: ["reimage"],
+        penaltyReasons: {
+          reimage: "The host hasn't been compromised yet — RDP is just exposed. Reimaging destroys a clean system unnecessarily. Disable RDP or restrict access to VPN first.",
+        },
       },
       {
         stage: 1,
@@ -99,6 +113,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["disable_rdp", "mfa", "block_ip"],
         penaltyMitigations: ["reimage"],
+        penaltyReasons: {
+          reimage: "Active brute forcing doesn't require a reimage — the attacker hasn't logged in yet. Disable the exposed service, enforce MFA, or block the attacker's IP first.",
+        },
       },
       {
         stage: 2,
@@ -111,6 +128,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "reimage"],
         penaltyMitigations: ["vpn_only"],
+        penaltyReasons: {
+          vpn_only: "The attacker already has an active authenticated session. Enforcing VPN-only access doesn't terminate existing connections — isolate the host or reimage to evict them.",
+        },
         maySpread: true,
       },
       {
@@ -124,6 +144,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["reimage"],
         penaltyMitigations: ["vpn_only", "block_ip"],
+        penaltyReasons: {
+          vpn_only: "The attacker has already escalated privileges inside the network. VPN enforcement won't remove an existing foothold — a full reimage is required.",
+          block_ip: "The attacker is already operating from inside the network with stolen tokens. Blocking their original IP doesn't evict them — a reimage is the only clean option.",
+        },
       },
     ],
     mitigations: [
@@ -155,6 +179,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "quarantine"],
         penaltyMitigations: ["rotate_creds", "run_edr"],
+        penaltyReasons: {
+          rotate_creds: "Rotating credentials doesn't stop active file encryption — the ransomware process is running right now. Every second costs data. Isolate or quarantine the host immediately.",
+          run_edr: "An EDR scan is too slow while encryption is actively happening. You don't need detection — you need containment. Isolate or quarantine the host to cut off the encryption process first.",
+        },
       },
       {
         stage: 1,
@@ -167,6 +195,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["restore_backup", "reimage"],
         penaltyMitigations: ["rotate_creds"],
+        penaltyReasons: {
+          rotate_creds: "Credentials aren't the attack vector here — the ransomware binary is already running. Rotating creds won't stop active encryption. Restore from backup or reimage.",
+        },
       },
       {
         stage: 2,
@@ -210,6 +241,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["run_edr", "mfa"],
         penaltyMitigations: ["restore_backup", "reimage"],
+        penaltyReasons: {
+          restore_backup: "There's no data loss yet — the attacker is reading memory, not corrupting files. A restore is disruptive and unnecessary. Run EDR to catch the dump process in action.",
+          reimage: "Reimaging destroys forensic evidence of which credentials were taken. Confirm scope with EDR first, then rotate credentials before wiping the system.",
+        },
       },
       {
         stage: 1,
@@ -222,6 +257,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["rotate_creds", "block_lateral"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "The stolen credentials exist outside this system now — a restore doesn't invalidate them. Rotate all credentials immediately to revoke the attacker's ability to reuse them.",
+        },
       },
       {
         stage: 2,
@@ -234,6 +272,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["rotate_creds", "reimage"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "The attacker is logging in with valid stolen credentials — not malware on disk. Restoring the host doesn't revoke their access. Rotate credentials and reimage to fully evict them.",
+        },
         maySpread: true,
       },
     ],
@@ -265,6 +306,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["block_lateral", "isolate_vlan"],
         penaltyMitigations: ["reimage", "restore_backup"],
+        penaltyReasons: {
+          reimage: "The attacker is only scanning — they haven't moved yet. Reimaging causes unnecessary downtime on a still-intact host. Block lateral movement paths to stop them before they pivot.",
+          restore_backup: "No data has been modified — only network scanning is occurring. Restoring from backup wastes response time and changes nothing. Block SMB paths first.",
+        },
       },
       {
         stage: 1,
@@ -277,6 +322,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["block_lateral", "quarantine"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "The attacker is copying files to other hosts — not corrupting the source. Restoring the source doesn't stop active traversal. Quarantine the host or block lateral movement immediately.",
+        },
       },
       {
         stage: 2,
@@ -289,6 +337,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "reimage"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "The attacker has a new foothold on a second system. Restoring the original host doesn't evict them from the pivot host — isolate the entire VLAN to cut off their access.",
+        },
         maySpread: true,
       },
     ],
@@ -320,6 +371,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["quarantine", "notify_soc"],
         penaltyMitigations: ["rotate_creds"],
+        penaltyReasons: {
+          rotate_creds: "The threat is a backdoored dependency executing malicious code — not a credential compromise. Rotating credentials won't stop code that's already running in your build pipeline.",
+        },
       },
       {
         stage: 1,
@@ -332,6 +386,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["reimage", "rotate_creds"],
         penaltyMitigations: ["run_edr"],
+        penaltyReasons: {
+          run_edr: "The build system is compromised at a source code level — EDR scans for malware processes, not poisoned build scripts. Reimage and rebuild from a verified clean baseline.",
+        },
       },
       {
         stage: 2,
@@ -344,6 +401,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["reimage", "restore_backup"],
         penaltyMitigations: ["run_edr"],
+        penaltyReasons: {
+          run_edr: "EDR can't detect a backdoor baked into your compiled build artifacts. You need to rebuild from clean source and restore a known-good deployment to evict the backdoor.",
+        },
         maySpread: true,
       },
     ],
@@ -376,6 +436,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["waf_block", "patch_app"],
         penaltyMitigations: ["reimage", "isolate_vlan"],
+        penaltyReasons: {
+          reimage: "The server hasn't been compromised yet — attacks are still being probed. Taking it offline with a reimage is unnecessary. Block malicious requests with a WAF rule or patch the vulnerable endpoint.",
+          isolate_vlan: "Isolating the server VLAN takes down all services in that segment over what is still just probing. Apply targeted WAF rules or patch the vulnerability before escalating to full isolation.",
+        },
       },
       {
         stage: 1,
@@ -388,6 +452,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["isolate_vlan", "patch_app"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "The vulnerability is still present in the application code. Restoring the server means the attacker can exploit the same flaw again immediately. Patch the vulnerability or isolate first.",
+        },
       },
       {
         stage: 2,
@@ -400,6 +467,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["reimage", "isolate_vlan"],
         penaltyMitigations: ["restore_backup"],
+        penaltyReasons: {
+          restore_backup: "Restoring the server may reintroduce the same vulnerable application that allowed the web shell. The vulnerability must be patched first — or reimage with a clean, patched build.",
+        },
         maySpread: true,
       },
     ],
@@ -431,6 +501,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["fix_acl", "notify_soc"],
         penaltyMitigations: ["reimage", "quarantine"],
+        penaltyReasons: {
+          reimage: "You can't reimage a cloud storage bucket — it's not a virtual machine. Correct the bucket ACL policy to remove public access and notify the SOC.",
+          quarantine: "Cloud buckets can't be quarantined like endpoints. Revoke public access immediately by correcting the bucket permissions in your cloud console.",
+        },
       },
       {
         stage: 1,
@@ -443,6 +517,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["fix_acl", "rotate_creds"],
         penaltyMitigations: ["reimage", "quarantine"],
+        penaltyReasons: {
+          reimage: "There's no server to reimage — the data is in cloud storage. Fix the bucket permissions and rotate any credentials or API keys that were exposed.",
+          quarantine: "Quarantine applies to endpoints, not cloud storage buckets. Close the public access policy and rotate all exposed API keys and service account credentials.",
+        },
       },
       {
         stage: 2,
@@ -455,6 +533,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["rotate_creds", "mfa"],
         penaltyMitigations: ["reimage", "quarantine"],
+        penaltyReasons: {
+          reimage: "The attacker is abusing IAM roles — not a compromised VM. Reimaging won't revoke rogue admin accounts. Rotate cloud credentials and enforce MFA on all IAM accounts.",
+          quarantine: "IAM-level privilege escalation can't be stopped by quarantining. Revoke the compromised IAM roles, delete rogue accounts, and rotate all cloud credentials immediately.",
+        },
         maySpread: true,
       },
     ],
@@ -486,6 +568,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["run_edr", "notify_soc"],
         penaltyMitigations: ["revoke_access"],
+        penaltyReasons: {
+          revoke_access: "Revoking access before gathering evidence could tip off the insider and destroy forensic trails. Investigate first — collect logs and confirm malicious intent before taking action.",
+        },
       },
       {
         stage: 1,
@@ -540,6 +625,10 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["rate_limit", "cdn_mitigation"],
         penaltyMitigations: ["run_edr", "isolate_vlan"],
+        penaltyReasons: {
+          run_edr: "EDR scans endpoints for malware — it can't stop a volumetric flood of external traffic. The threat is bandwidth saturation. Enable rate limiting or CDN protection to absorb it.",
+          isolate_vlan: "Isolating your own subnet takes the service completely offline — which is exactly what the attacker wants. Use rate limiting or CDN scrubbing to filter bad traffic instead.",
+        },
       },
       {
         stage: 1,
@@ -552,6 +641,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["cdn_mitigation", "block_ip"],
         penaltyMitigations: ["run_edr"],
+        penaltyReasons: {
+          run_edr: "EDR is a host-based tool — it doesn't mitigate network-level DDoS traffic. Your infrastructure is being saturated externally. Activate CDN DDoS protection or block the attacker's IP ranges.",
+        },
       },
       {
         stage: 2,
@@ -564,6 +656,9 @@ export const VULNS = {
         ],
         requiredMitigationsAnyOf: ["cdn_mitigation", "rate_limit"],
         penaltyMitigations: ["run_edr"],
+        penaltyReasons: {
+          run_edr: "Running EDR while the service is down wastes critical response seconds. This is a network-layer attack — activate CDN DDoS mitigation or rate limiting to restore service first.",
+        },
       },
     ],
     mitigations: [

@@ -72,6 +72,7 @@ export function makeInitialHosts() {
     stageTimeLeft: VULNS[h.vulnId].stages[0].timeLimitSec,
     appliedMitigations: [],
     pendingMitigations: [],          // { id, timeLeft } — queued but not yet applied
+    penaltyMessage: null,            // contextual explanation when wrong tool is used
     lastEvent: h.spawnDelaySec === 0 ? "Alert created" : `Threat incoming in ${h.spawnDelaySec}s`,
   }));
 }
@@ -96,10 +97,13 @@ export function applyMitigationPure(hosts, hostId, mitigationId) {
 
     // ── Penalty: wrong / overkill action ──────────────────────────────────
     if (stage.penaltyMitigations?.includes(mitigationId)) {
+      const reason = stage.penaltyReasons?.[mitigationId]
+        ?? `${mitigationId} is not effective at this stage.`;
       return {
         ...h,
         stageTimeLeft: Math.max(1, h.stageTimeLeft - PENALTY_SEC),
         lastEvent: `⚠ Wrong tool — escalation sped up by ${PENALTY_SEC}s!`,
+        penaltyMessage: reason,
       };
     }
 
@@ -117,6 +121,15 @@ export function applyMitigationPure(hosts, hostId, mitigationId) {
   });
 
   return { hosts: nextHosts, pointsAwarded };
+}
+
+/**
+ * Clear the penalty message on one host (called when player dismisses the banner).
+ */
+export function clearPenaltyMessagePure(hosts, hostId) {
+  return hosts.map((h) =>
+    h.id === hostId ? { ...h, penaltyMessage: null } : h
+  );
 }
 
 /**
@@ -197,6 +210,7 @@ export function stepSimulationPure(prevHosts, gameState) {
       status: newStatus,
       stageTimeLeft: escalatedStage.timeLimitSec,
       pendingMitigations: [],        // clear pending — new stage, new actions needed
+      penaltyMessage: null,          // clear penalty message on escalation
       lastEvent: `Escalated to: ${escalatedStage.label}`,
     };
   });

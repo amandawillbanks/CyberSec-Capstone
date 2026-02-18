@@ -6,6 +6,7 @@ import { INITIAL_HOSTS, VULNS } from "./CapstoneData.js";
 import {
   makeInitialHosts,
   applyMitigationPure,
+  clearPenaltyMessagePure,
   stepSimulationPure,
   MITIGATION_APPLY_TIMES,
 } from "./sim/gameEngine.js";
@@ -114,6 +115,10 @@ export default function CapstoneMVP() {
       if (pointsAwarded) setScore((s) => s + pointsAwarded);
       return nextHosts;
     });
+  }
+
+  function dismissPenalty(hostId) {
+    setHosts((prev) => clearPenaltyMessagePure(prev, hostId));
   }
 
   const statusColor = (status) => {
@@ -256,6 +261,19 @@ export default function CapstoneMVP() {
           ) : (
             <>
               <div style={styles.mutedSmall}>{selectedVuln.description}</div>
+
+              {selectedHost.penaltyMessage && (
+                <div style={styles.penaltyBanner}>
+                  <div style={styles.penaltyBannerHeader}>
+                    <span style={styles.penaltyBannerTitle}>⚠ WRONG TOOL — WHY?</span>
+                    <button
+                      style={styles.penaltyDismiss}
+                      onClick={() => dismissPenalty(selectedHost.id)}
+                    >✕</button>
+                  </div>
+                  <div style={styles.penaltyBannerBody}>{selectedHost.penaltyMessage}</div>
+                </div>
+              )}
 
               <div style={styles.section}>
                 <div style={styles.sectionTitle}>Available Mitigations</div>
@@ -801,6 +819,43 @@ const styles = {
     textShadow: `0 0 12px rgba(0,255,247,0.6)`,
     boxShadow: `0 0 20px rgba(0,255,247,0.12)`,
     cursor: "pointer",
+  },
+
+  // ── Penalty banner ─────────────────────────────────────────────────────────
+  penaltyBanner: {
+    margin: "10px 0 4px",
+    border: `1px solid rgba(255,0,60,0.4)`,
+    borderLeft: `3px solid ${C.red}`,
+    background: "rgba(255,0,60,0.07)",
+    padding: "9px 10px",
+  },
+  penaltyBannerHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  penaltyBannerTitle: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: C.red,
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    textShadow: `0 0 8px rgba(255,0,60,0.5)`,
+  },
+  penaltyDismiss: {
+    background: "none",
+    border: "none",
+    color: "rgba(255,100,100,0.6)",
+    fontSize: 12,
+    cursor: "pointer",
+    padding: "0 2px",
+    lineHeight: 1,
+  },
+  penaltyBannerBody: {
+    fontSize: 11,
+    color: "#ffbbbb",
+    lineHeight: 1.6,
   },
 
   // ── Lost debrief ───────────────────────────────────────────────────────────
