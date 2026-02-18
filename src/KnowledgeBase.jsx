@@ -361,135 +361,147 @@ const ACTION_GLOSSARY = {
 
 const VULN_LIST = Object.values(VULNS);
 
-export default function KnowledgeBase({ onClose }) {
+export default function KnowledgeBase({ onClose, inline = false }) {
   const [selectedId, setSelectedId] = useState(VULN_LIST[0].id);
   const selected = VULNS[selectedId];
   const domain = DOMAIN_MAP[selectedId];
   const edu = ATTACK_EDUCATION[selectedId];
 
-  return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+  const modalStyle = inline
+    ? { ...styles.modal, width: "100%", height: "auto", maxHeight: "60vh", borderRadius: 8 }
+    : styles.modal;
 
-        {/* ── Modal header ── */}
-        <div style={styles.modalHeader}>
-          <div>
-            <div style={styles.modalTitle}>Knowledge Base</div>
-            <div style={styles.modalSubtitle}>
-              Learn how each attack works and why defenses matter — figure out the right response yourself.
-            </div>
+  const modalContent = (
+    <div style={modalStyle} onClick={inline ? undefined : (e) => e.stopPropagation()}>
+
+      {/* ── Header ── */}
+      <div style={styles.modalHeader}>
+        <div>
+          <div style={styles.modalTitle}>Knowledge Base</div>
+          <div style={styles.modalSubtitle}>
+            Learn how each attack works and why defenses matter — figure out the right response yourself.
           </div>
-          <button style={styles.closeBtn} onClick={onClose}>✕ Close</button>
         </div>
+        <button style={styles.closeBtn} onClick={onClose}>✕ Close</button>
+      </div>
 
-        <div style={styles.body}>
+      <div style={styles.body}>
 
-          {/* ── Left sidebar ── */}
-          <nav style={styles.sidebar}>
-            {VULN_LIST.map((v, i) => {
-              const dom = DOMAIN_MAP[v.id];
-              const isActive = v.id === selectedId;
-              return (
-                <button
-                  key={v.id}
-                  style={{ ...styles.sideItem, ...(isActive ? styles.sideItemActive : {}) }}
-                  onClick={() => setSelectedId(v.id)}
-                >
-                  <span style={styles.sideNum}>{i + 1}</span>
-                  <span style={styles.sideText}>
-                    <span style={styles.sideName}>{v.name}</span>
-                    <span style={{ ...styles.sideDomain, color: dom.color }}>{dom.label}</span>
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
+        {/* ── Left sidebar ── */}
+        <nav style={styles.sidebar}>
+          {VULN_LIST.map((v, i) => {
+            const dom = DOMAIN_MAP[v.id];
+            const isActive = v.id === selectedId;
+            return (
+              <button
+                key={v.id}
+                style={{ ...styles.sideItem, ...(isActive ? styles.sideItemActive : {}) }}
+                onClick={() => setSelectedId(v.id)}
+              >
+                <span style={styles.sideNum}>{i + 1}</span>
+                <span style={styles.sideText}>
+                  <span style={styles.sideName}>{v.name}</span>
+                  <span style={{ ...styles.sideDomain, color: dom.color }}>{dom.label}</span>
+                </span>
+              </button>
+            );
+          })}
+        </nav>
 
-          {/* ── Right content pane ── */}
-          <div style={styles.content}>
+        {/* ── Right content pane ── */}
+        <div style={styles.content}>
 
-            {/* Title + domain */}
-            <div style={styles.contentHeader}>
-              <div style={styles.contentTitle}>{selected.name}</div>
-              <span style={{ ...styles.domainBadge, borderColor: domain.color, color: domain.color }}>
-                {domain.label}
-              </span>
-            </div>
+          {/* Title + domain */}
+          <div style={styles.contentHeader}>
+            <div style={styles.contentTitle}>{selected.name}</div>
+            <span style={{ ...styles.domainBadge, borderColor: domain.color, color: domain.color }}>
+              {domain.label}
+            </span>
+          </div>
 
-            {/* Overview */}
-            <div style={styles.sectionTitle}>What Is This Attack?</div>
-            <p style={styles.bodyText}>{edu?.overview}</p>
+          {/* Overview */}
+          <div style={styles.sectionTitle}>What Is This Attack?</div>
+          <p style={styles.bodyText}>{edu?.overview}</p>
 
-            {/* How it works */}
-            <div style={styles.sectionTitle}>How Attackers Execute It</div>
-            <p style={styles.bodyText}>{edu?.howItWorks}</p>
+          {/* How it works */}
+          <div style={styles.sectionTitle}>How Attackers Execute It</div>
+          <p style={styles.bodyText}>{edu?.howItWorks}</p>
 
-            {/* Defender mindset */}
-            <div style={styles.infoBox}>
-              <div style={styles.infoBoxLabel}>Defender Mindset</div>
-              <p style={styles.infoBoxText}>{edu?.defenderMindset}</p>
-            </div>
+          {/* Defender mindset */}
+          <div style={styles.infoBox}>
+            <div style={styles.infoBoxLabel}>Defender Mindset</div>
+            <p style={styles.infoBoxText}>{edu?.defenderMindset}</p>
+          </div>
 
-            {/* ── Attack Progression ── */}
-            <div style={styles.sectionTitle}>Attack Progression</div>
-            <div style={styles.stagesGrid}>
-              {selected.stages.map((s) => (
-                <div key={s.stage} style={styles.stageCard}>
-                  <div style={styles.stageHeader}>
-                    <span style={styles.stageLabel}>Stage {s.stage}: {s.label}</span>
-                    <span style={styles.stageTimer}>⏱ {s.timeLimitSec}s</span>
+          {/* ── Attack Progression ── */}
+          <div style={styles.sectionTitle}>Attack Progression</div>
+          <div style={styles.stagesGrid}>
+            {selected.stages.map((s) => (
+              <div key={s.stage} style={styles.stageCard}>
+                <div style={styles.stageHeader}>
+                  <span style={styles.stageLabel}>Stage {s.stage}: {s.label}</span>
+                  <span style={styles.stageTimer}>⏱ {s.timeLimitSec}s</span>
+                </div>
+
+                <div style={styles.stageSubtitle}>What the attacker is doing:</div>
+                <ul style={styles.list}>
+                  {s.attackerActions.map((a) => (
+                    <li key={a} style={styles.attackItem}>
+                      <span style={styles.dot}>●</span>
+                      <span>
+                        <span style={styles.actionName}>{a}</span>
+                        {ACTION_GLOSSARY[a] && (
+                          <span style={styles.actionDesc}>{ACTION_GLOSSARY[a]}</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+
+                {edu?.stageContext?.[s.stage] && (
+                  <div style={styles.stageContext}>
+                    {edu.stageContext[s.stage]}
                   </div>
+                )}
+              </div>
+            ))}
+          </div>
 
-                  <div style={styles.stageSubtitle}>What the attacker is doing:</div>
-                  <ul style={styles.list}>
-                    {s.attackerActions.map((a) => (
-                      <li key={a} style={styles.attackItem}>
-                        <span style={styles.dot}>●</span>
-                        <span>
-                          <span style={styles.actionName}>{a}</span>
-                          {ACTION_GLOSSARY[a] && (
-                            <span style={styles.actionDesc}>{ACTION_GLOSSARY[a]}</span>
-                          )}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {edu?.stageContext?.[s.stage] && (
-                    <div style={styles.stageContext}>
-                      {edu.stageContext[s.stage]}
-                    </div>
+          {/* ── Defensive Options ── */}
+          <div style={styles.sectionTitle}>Defensive Options</div>
+          <p style={styles.bodyTextSmall}>
+            The following actions are available for this attack type. Consider the security
+            concept behind each one and decide which applies to what the attacker is currently doing.
+          </p>
+          <div style={styles.mitGrid}>
+            {selected.mitigations.map((m) => {
+              const concept = MITIGATION_CONCEPTS[m.id];
+              return (
+                <div key={m.id} style={styles.mitCard}>
+                  <div style={styles.mitLabel}>{m.label}</div>
+                  {concept && (
+                    <>
+                      <div style={styles.mitConcept}>{concept.concept}</div>
+                      <div style={styles.mitDesc}>{concept.why}</div>
+                    </>
                   )}
                 </div>
-              ))}
-            </div>
-
-            {/* ── Defensive Options ── */}
-            <div style={styles.sectionTitle}>Defensive Options</div>
-            <p style={styles.bodyTextSmall}>
-              The following actions are available for this attack type. Consider the security
-              concept behind each one and decide which applies to what the attacker is currently doing.
-            </p>
-            <div style={styles.mitGrid}>
-              {selected.mitigations.map((m) => {
-                const concept = MITIGATION_CONCEPTS[m.id];
-                return (
-                  <div key={m.id} style={styles.mitCard}>
-                    <div style={styles.mitLabel}>{m.label}</div>
-                    {concept && (
-                      <>
-                        <div style={styles.mitConcept}>{concept.concept}</div>
-                        <div style={styles.mitDesc}>{concept.why}</div>
-                      </>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
+              );
+            })}
           </div>
+
         </div>
       </div>
+    </div>
+  );
+
+  if (inline) {
+    return <div style={{ margin: "0 10px 10px" }}>{modalContent}</div>;
+  }
+
+  return (
+    <div style={styles.overlay} onClick={onClose}>
+      {modalContent}
     </div>
   );
 }

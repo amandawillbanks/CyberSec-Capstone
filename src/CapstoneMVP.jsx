@@ -141,8 +141,7 @@ export default function CapstoneMVP() {
         </div>
       </header>
 
-      {/* KB overlay */}
-      {showKB && <KnowledgeBase onClose={() => setShowKB(false)} />}
+      {/* KB rendered inline below the grid — see bottom of return */}
 
       {/* ── 3-col grid ─────────────────────────────────────────── */}
       <div style={styles.grid}>
@@ -283,6 +282,9 @@ export default function CapstoneMVP() {
           )}
         </div>
       </div>
+
+      {/* ── Inline Knowledge Base (below grid) ─────────────────── */}
+      {showKB && <KnowledgeBase onClose={() => setShowKB(false)} inline />}
 
       {/* ── Intro modal ─────────────────────────────────────────── */}
       {showIntro && (
@@ -561,9 +563,10 @@ const styles = {
     textShadow: `0 0 12px rgba(0,255,247,0.5)`,
   },
   globeFrame: {
-    flex: 1,
-    minHeight: 400,
-    maxHeight: 560,
+    width: "100%",
+    aspectRatio: "1 / 1",
+    maxHeight: 520,
+    margin: "0 auto",
     border: `1px solid rgba(0,255,247,0.2)`,
     boxShadow: `0 0 40px rgba(0,255,247,0.08), inset 0 0 60px rgba(0,10,20,0.8)`,
     background: [
