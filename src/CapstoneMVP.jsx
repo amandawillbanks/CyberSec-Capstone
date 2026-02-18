@@ -563,9 +563,8 @@ const styles = {
     textShadow: `0 0 12px rgba(0,255,247,0.5)`,
   },
   globeFrame: {
-    width: "100%",
+    width: "min(100%, 380px)",
     aspectRatio: "1 / 1",
-    maxHeight: 520,
     margin: "0 auto",
     border: `1px solid rgba(0,255,247,0.2)`,
     boxShadow: `0 0 40px rgba(0,255,247,0.08), inset 0 0 60px rgba(0,10,20,0.8)`,
