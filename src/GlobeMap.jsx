@@ -12,8 +12,8 @@ import worldTopo from "world-atlas/countries-110m.json";
 
 /** Convert your xPct/yPct (0–100) into rough lon/lat */
 function hostToLonLat(host) {
-  const lon = (host.xPct / 100) * 360 - 180;     // 0..100 => -180..180
-  const lat = 90 - (host.yPct / 100) * 180;      // 0..100 => 90..-90
+  const lon = (host.xPct / 100) * 360 - 180; // 0..100 => -180..180
+  const lat = 90 - (host.yPct / 100) * 180; // 0..100 => 90..-90
   return [lon, lat];
 }
 
@@ -24,6 +24,9 @@ export default function GlobeMap({
   statusColor = () => "#00fff7",
   autoRotate = true,
   running = false,
+  // Optional knobs (safe defaults)
+  maxSize = 900, // hard cap in px
+  vw = 60, // % of viewport width to target
 }) {
   const [rotation, setRotation] = useState([0, -15, 0]);
   const rafRef = useRef(null);
@@ -73,8 +76,25 @@ export default function GlobeMap({
     return out;
   }, [hostNodes]);
 
+  /**
+   * KEY FIX:
+   * We constrain the *container* so the SVG can't explode to full screen.
+   * - width: min(maxSize, vw% of viewport)
+   * - aspectRatio: always 1:1 (keeps globe square)
+   * - maxHeight: prevents it from exceeding the viewport height too much
+   */
+  const wrapperStyle = {
+    width: `min(${maxSize}px, ${vw}vw)`,
+    aspectRatio: "1 / 1",
+    maxHeight: "85vh",
+    margin: "0 auto",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
+
   return (
-    <div style={{ width: "100%", height: "100%" }}>
+    <div style={wrapperStyle}>
       <ComposableMap
         width={600}
         height={600}
@@ -86,13 +106,9 @@ export default function GlobeMap({
         style={{ width: "100%", height: "100%" }}
       >
         {/* Globe sphere */}
-        <Sphere
-          fill="#0a1628"
-          stroke="#4a9eda"
-          strokeWidth={1.5}
-        />
+        <Sphere fill="#0a1628" stroke="#4a9eda" strokeWidth={1.5} />
 
-        {/* ✅ Real lat/long grid */}
+        {/* Lat/long grid */}
         <Graticule stroke="rgba(255,255,255,0.10)" strokeWidth={0.6} />
 
         {/* Land */}
@@ -115,11 +131,9 @@ export default function GlobeMap({
           }
         </Geographies>
 
-        {/* ✅ Network lines between hosts (glow) */}
+        {/* (Optional) Network lines placeholder – currently returning null in your original */}
         {links.map((lnk, idx) => {
-          const color = lnk.hot ? "#ff0077" : "#00fff7";
-          const thick = lnk.hot ? 2.2 : 1.2;
-          const glow = lnk.hot ? 7 : 6;
+          // You can draw lines here later if you want.
           return null;
         })}
 
@@ -155,7 +169,7 @@ export default function GlobeMap({
                 <circle
                   r={12}
                   fill={statusColor(h.status)}
-                  opacity={h.status === "compromised" ? 0.20 : 0.12}
+                  opacity={h.status === "compromised" ? 0.2 : 0.12}
                   style={{ filter: "blur(6px)" }}
                 />
 
