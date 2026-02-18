@@ -112,204 +112,169 @@ export default function CapstoneMVP() {
   };
 
   return (
-    <div style={{ padding: 16, fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial" }}>
-      <h1 style={{ margin: 0 }}>CyberSecurity Lab</h1>
-      <div style={{ opacity: 0.8, marginBottom: 12 }}>
-        Globe + Hosts + Attacker Escalation + Mitigations
-      </div>
+    <div style={styles.page}>
+      {/* Blink keyframe for intro/alert cursors */}
+      <style>{`@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }`}</style>
 
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
-        <div><b>Score:</b> {score}</div>
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <header style={styles.header}>
         <div>
-          <b>State:</b>{" "}
-          {gameState === "ready"
-            ? "Ready"
-            : gameState === "running"
-            ? "Running"
-            : gameState === "won"
-            ? "Won ✅"
-            : "Lost ❌"}
+          <div style={styles.title}>CyberSec Ops Center</div>
+          <div style={styles.subTitle}>Global Threat Response Platform</div>
         </div>
+        <div style={styles.headerRight}>
+          <span style={styles.badge}>Score: {score}</span>
+          <span style={{
+            ...styles.badge,
+            color: gameState === "running" ? C.green : gameState === "lost" ? C.red : gameState === "won" ? C.cyan : "rgba(0,255,247,0.4)",
+          }}>
+            {gameState === "ready" ? "STANDBY" : gameState === "running" ? "ACTIVE" : gameState === "won" ? "MISSION SUCCESS" : "MISSION FAILED"}
+          </span>
+          <div style={styles.buttonRow}>
+            <button style={styles.btn} onClick={start}>▶ START</button>
+            <button style={styles.btn} onClick={() => setRunning((r) => !r)} disabled={gameState !== "running"}>
+              {running ? "⏸ PAUSE" : "▶ RESUME"}
+            </button>
+            <button style={styles.btn} onClick={stop}>↺ RESET</button>
+            <button style={styles.kbBtn} onClick={() => setShowKB(true)}>📖 KNOWLEDGE BASE</button>
+          </div>
+        </div>
+      </header>
 
-        <button onClick={start}>Start</button>
-        <button onClick={() => setRunning((r) => !r)} disabled={gameState !== "running"}>
-          {running ? "Pause" : "Resume"}
-        </button>
-        <button onClick={stop}>Reset</button>
-        <button onClick={() => setShowKB(true)}>Knowledge Base</button>
-      </div>
-
+      {/* KB overlay */}
       {showKB && <KnowledgeBase onClose={() => setShowKB(false)} />}
 
-      {gameState === "lost" && lostHosts.length > 0 && (
-        <div style={{ border: "1px solid #ff4d4d", padding: 12, marginBottom: 12 }}>
-          <h3 style={{ marginTop: 0 }}>▌ MISSION FAILED — NETWORK BREACHED ▌</h3>
-          <div style={{ marginBottom: 8 }}>
-            ⛔ {lostHosts.length} host{lostHosts.length > 1 ? "s were" : " was"} fully compromised
-            before containment. Threat actors have achieved persistent access.
-          </div>
+      {/* ── 3-col grid ─────────────────────────────────────────── */}
+      <div style={styles.grid}>
 
-          {lostHosts.map((h) => {
-            const vuln = VULNS[h.vulnId];
-            const failedStage = vuln.stages[h.stageIndex];
-            const missing = failedStage.requiredMitigationsAnyOf.filter(
-              (m) => !h.appliedMitigations.includes(m)
-            );
-            const applied = h.appliedMitigations;
-
-            return (
-              <div key={h.id} style={{ padding: 10, borderTop: "1px solid rgba(255,77,77,0.35)" }}>
-                <b>{h.name}</b> • {h.region} • <b>{vuln.name}</b>
-                <div>Failed at stage: {failedStage.label} (Stage {h.stageIndex})</div>
-
-                {applied.length > 0 && <div>Mitigations applied: {applied.join(", ")}</div>}
-                {missing.length > 0 && <div>Would have helped: {missing.join(" or ")}</div>}
-
-                <div style={{ marginTop: 6, opacity: 0.9 }}>
-                  {applied.length === 0
-                    ? `No mitigations were applied to ${h.name}. Always respond to every spawned host — even a single wrong action is better than none.`
-                    : missing.length > 0
-                    ? `The mitigations applied didn't satisfy the requirement for this stage. Check the Knowledge Base to learn which defenses stop "${failedStage.label}".`
-                    : `Mitigations were applied but escalation wasn't stopped in time. Act faster on Stage ${h.stageIndex} threats — the timer is unforgiving.`}
-                </div>
-              </div>
-            );
-          })}
-
-          <div style={{ marginTop: 10, display: "flex", gap: 10 }}>
-            <button onClick={start}>↺ RETRY MISSION</button>
-            <button onClick={() => setShowKB(true)}>▶ OPEN KNOWLEDGE BASE</button>
-          </div>
-        </div>
-      )}
-
-      {showIntro && (
-        <div style={{ border: "1px solid rgba(255,255,255,0.2)", padding: 12, marginBottom: 12 }}>
-          <h3 style={{ marginTop: 0 }}>▌ SYSTEM ALERT — INCOMING THREAT DETECTION ▌</h3>
-          <div style={{ marginBottom: 8 }}>
-            ⚠ CRITICAL: Your network is reporting active host compromise events. Multiple endpoints are
-            exhibiting indicators of attack across global infrastructure nodes. Threat actors are escalating — time is limited.
-          </div>
-          <ol style={{ marginTop: 0 }}>
-            <li>Review incoming alerts on the Global Threat Globe — hosts will spawn as threats are detected.</li>
-            <li>Select a host to view attacker activity and available mitigations in the right panel.</li>
-            <li>Consult the Knowledge Base to understand attack techniques and why defenses work — don't just guess.</li>
-            <li>Contain all hosts before 2 become compromised or the mission fails.</li>
-          </ol>
-          <button onClick={() => setShowIntro(false)}>▶ ACKNOWLEDGE & ENTER OPERATIONS CENTER</button>
-        </div>
-      )}
-
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr 1fr", gap: 12 }}>
-        {/* Left: Attacker */}
-        <div style={{ border: "1px solid rgba(255,255,255,0.15)", padding: 12 }}>
-          <h3 style={{ marginTop: 0 }}>Attacker</h3>
+        {/* Left: Attacker Intel */}
+        <div style={styles.panel}>
+          <div style={styles.panelTitle}>▌ Attacker Intel</div>
 
           {!selectedHost || !selectedVuln ? (
-            <div>Select a host.</div>
+            <div style={styles.muted}>Select a host on the globe.</div>
           ) : (
             <>
-              <div><b>Host:</b> {selectedHost.name}</div>
-              <div><b>Vulnerability:</b> {selectedVuln.name}</div>
-              <div>
-                <b>Stage:</b> {currentStage?.label ?? "—"} (#{selectedHost.stageIndex})
+              <div style={styles.kv}><span style={styles.k}>HOST</span><span style={styles.v}>{selectedHost.name}</span></div>
+              <div style={styles.kv}><span style={styles.k}>REGION</span><span style={styles.v}>{selectedHost.region}</span></div>
+              <div style={styles.kv}><span style={styles.k}>ATTACK</span><span style={styles.v}>{selectedVuln.name}</span></div>
+              <div style={styles.kv}>
+                <span style={styles.k}>STAGE</span>
+                <span style={styles.v}>{currentStage?.label ?? "—"} #{selectedHost.stageIndex}</span>
               </div>
-              <div>
-                <b>Escalates In:</b>{" "}
-                {selectedHost.status === "safe" || selectedHost.status === "quarantined"
-                  ? "Contained"
-                  : `${selectedHost.stageTimeLeft}s`}
+              <div style={styles.kv}>
+                <span style={styles.k}>ESCALATES IN</span>
+                <span style={{
+                  ...styles.v,
+                  color: selectedHost.stageTimeLeft <= 15 ? C.red : selectedHost.stageTimeLeft <= 30 ? C.yellow : C.green,
+                }}>
+                  {selectedHost.status === "safe" || selectedHost.status === "quarantined"
+                    ? "CONTAINED"
+                    : `${selectedHost.stageTimeLeft}s`}
+                </span>
               </div>
 
-              <div style={{ marginTop: 10 }}>
-                <b>Possible Attacks</b>
-                <ul>
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>Possible Attacker Actions</div>
+                <ul style={styles.list}>
                   {(currentStage?.attackerActions ?? []).map((a) => (
-                    <li key={a}>{a}</li>
+                    <li key={a} style={styles.listItem}>{a}</li>
                   ))}
                 </ul>
               </div>
 
-              <div style={{ marginTop: 10 }}>
-                <b>Last Event</b>
-                <div style={{ opacity: 0.9 }}>{selectedHost.lastEvent}</div>
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>Last Event</div>
+                <div style={styles.eventBox}>{selectedHost.lastEvent || "Monitoring…"}</div>
               </div>
             </>
           )}
         </div>
 
         {/* Center: Globe */}
-        <div style={{ border: "1px solid rgba(255,255,255,0.15)", padding: 12 }}>
-          <h3 style={{ marginTop: 0 }}>Global Threat Globe</h3>
-          <div style={{ opacity: 0.85, marginBottom: 8 }}>
-            Click a host marker • Rotate buttons below • Auto-rotate while running
+        <main style={styles.mapWrap}>
+          <div style={styles.mapTitleRow}>
+            <div style={styles.mapTitle}>Global Threat Globe</div>
           </div>
 
-          <GlobeMap
-            hosts={hosts.filter((h) => h.spawned)}
-            selectedHostId={selectedHostId}
-            onSelectHost={setSelectedHostId}
-            statusColor={statusColor}
-            autoRotate={true}
-            running={running && gameState === "running"}
-          />
+          <div style={styles.globeFrame}>
+            <GlobeMap
+              hosts={hosts.filter((h) => h.spawned)}
+              selectedHostId={selectedHostId}
+              onSelectHost={setSelectedHostId}
+              statusColor={statusColor}
+              autoRotate={true}
+              running={running && gameState === "running"}
+            />
+          </div>
 
           {hosts.some((h) => !h.spawned) && (
-            <div style={{ marginTop: 10 }}>
-              <b>Incoming:</b>{" "}
-              {hosts
-                .filter((h) => !h.spawned)
-                .map((h) => (
-                  <span key={h.id} style={{ marginRight: 10 }}>
-                    {h.region} — {h.spawnCountdown}s
-                  </span>
-                ))}
+            <div style={styles.pendingRow}>
+              <span style={styles.pendingLabel}>INCOMING</span>
+              {hosts.filter((h) => !h.spawned).map((h) => (
+                <span key={h.id} style={styles.pendingChip}>{h.region} {h.spawnCountdown}s</span>
+              ))}
             </div>
           )}
 
-          <div style={{ marginTop: 12, display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <span>🟩 Safe</span>
-            <span>🟨 Warning</span>
-            <span>🟥 Compromised</span>
-            <span>🟦 Quarantined</span>
+          <div style={styles.mapLegend}>
+            {[
+              { label: "SAFE", color: C.green },
+              { label: "WARNING", color: C.yellow },
+              { label: "COMPROMISED", color: C.red },
+              { label: "QUARANTINED", color: "#66b3ff" },
+            ].map(({ label, color }) => (
+              <span key={label} style={styles.legendItem}>
+                <span style={{ ...styles.legendSwatch, background: color, color }} />
+                {label}
+              </span>
+            ))}
           </div>
-        </div>
+        </main>
 
-        {/* Right: Mitigations */}
-        <div style={{ border: "1px solid rgba(255,255,255,0.15)", padding: 12 }}>
-          <h3 style={{ marginTop: 0 }}>Mitigations</h3>
+        {/* Right: Defense Actions */}
+        <div style={styles.panel}>
+          <div style={styles.panelTitle}>▌ Defense Actions</div>
 
           {!selectedHost || !selectedVuln ? (
-            <div>Select a host.</div>
+            <div style={styles.muted}>Select a host on the globe.</div>
           ) : (
             <>
-              <div style={{ marginBottom: 10 }}>
-                <b>Recommended Actions</b>
-                <div style={{ opacity: 0.9 }}>{selectedVuln.description}</div>
+              <div style={styles.mutedSmall}>{selectedVuln.description}</div>
+
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>Available Mitigations</div>
+                <div style={styles.buttonGrid}>
+                  {selectedVuln.mitigations.map((m) => {
+                    const already = selectedHost.appliedMitigations.includes(m.id);
+                    return (
+                      <button
+                        key={m.id}
+                        disabled={already}
+                        onClick={() => applyMitigation(selectedHost.id, m.id)}
+                        style={{
+                          ...styles.actionBtn,
+                          opacity: already ? 0.45 : 1,
+                          cursor: already ? "not-allowed" : "pointer",
+                          borderLeftColor: already ? "rgba(0,255,247,0.15)" : "rgba(0,255,247,0.5)",
+                        }}
+                      >
+                        <div style={styles.actionLabel}>{m.label}</div>
+                        {!already && <div style={styles.actionMeta}>+{m.points} pts</div>}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
-              {selectedVuln.mitigations.map((m) => {
-                const already = selectedHost.appliedMitigations.includes(m.id);
-                return (
-                  <button
-                    key={m.id}
-                    disabled={already}
-                    onClick={() => applyMitigation(selectedHost.id, m.id)}
-                    style={{ display: "block", width: "100%", marginBottom: 8 }}
-                  >
-                    {m.label} {!already && <span style={{ opacity: 0.8 }}> (+{m.points} pts)</span>}
-                  </button>
-                );
-              })}
-
-              <div style={{ marginTop: 12 }}>
-                <b>Applied</b>
+              <div style={styles.section}>
+                <div style={styles.sectionTitle}>Applied</div>
                 {selectedHost.appliedMitigations.length === 0 ? (
-                  <div style={{ opacity: 0.8 }}>None yet.</div>
+                  <div style={styles.muted}>None yet.</div>
                 ) : (
-                  <ul>
+                  <ul style={styles.list}>
                     {selectedHost.appliedMitigations.map((x) => (
-                      <li key={x}>{x}</li>
+                      <li key={x} style={{ ...styles.listItem, color: C.green }}>• {x}</li>
                     ))}
                   </ul>
                 )}
@@ -318,6 +283,115 @@ export default function CapstoneMVP() {
           )}
         </div>
       </div>
+
+      {/* ── Intro modal ─────────────────────────────────────────── */}
+      {showIntro && (
+        <div style={styles.introOverlay}>
+          <div style={styles.introBox}>
+            <div style={styles.introHeader}>
+              <span style={styles.introBlink}>▌</span>
+              <span style={styles.introHeaderText}>SYSTEM ALERT — INCOMING THREAT DETECTION</span>
+              <span style={styles.introBlink}>▌</span>
+            </div>
+            <div style={styles.introBody}>
+              <div style={styles.introWarning}>
+                ⚠ CRITICAL: Your network is reporting active host compromise events. Multiple endpoints
+                are exhibiting indicators of attack across global infrastructure nodes. Threat actors are
+                escalating — time is limited.
+              </div>
+              <div style={styles.introSteps}>
+                {[
+                  ["01", "Review incoming alerts on the Global Threat Globe — hosts will spawn as threats are detected."],
+                  ["02", "Select a host to view attacker activity and available mitigations in the right panel."],
+                  ["03", "Consult the Knowledge Base to understand attack techniques and why defenses work — don't just guess."],
+                  ["04", "Contain all hosts before 2 become compromised or the mission fails."],
+                ].map(([num, text]) => (
+                  <div key={num} style={styles.introStep}>
+                    <span style={styles.introStepNum}>{num}</span>
+                    <span>{text}</span>
+                  </div>
+                ))}
+              </div>
+              <div style={styles.introFooter}>
+                <button style={styles.introBtn} onClick={() => setShowIntro(false)}>
+                  ▶ ACKNOWLEDGE &amp; ENTER OPERATIONS CENTER
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Loss debrief modal ──────────────────────────────────── */}
+      {gameState === "lost" && lostHosts.length > 0 && (
+        <div style={styles.introOverlay}>
+          <div style={{ ...styles.introBox, borderTopColor: C.red, width: "min(700px, 94vw)" }}>
+            <div style={{ ...styles.introHeader, borderBottomColor: "rgba(255,0,60,0.25)" }}>
+              <span style={{ ...styles.introBlink, color: C.red }}>▌</span>
+              <span style={{ ...styles.introHeaderText, color: C.red }}>MISSION FAILED — NETWORK BREACHED</span>
+              <span style={{ ...styles.introBlink, color: C.red }}>▌</span>
+            </div>
+            <div style={styles.introBody}>
+              <div style={{ ...styles.introWarning, borderLeftColor: C.red }}>
+                ⛔ {lostHosts.length} host{lostHosts.length > 1 ? "s were" : " was"} fully compromised
+                before containment. Threat actors have achieved persistent access.
+              </div>
+              <div style={styles.lostHostList}>
+                {lostHosts.map((h) => {
+                  const vuln = VULNS[h.vulnId];
+                  const failedStage = vuln.stages[h.stageIndex];
+                  const missing = failedStage.requiredMitigationsAnyOf.filter(
+                    (m) => !h.appliedMitigations.includes(m)
+                  );
+                  const applied = h.appliedMitigations;
+                  return (
+                    <div key={h.id} style={styles.lostHostCard}>
+                      <div style={styles.lostHostHeader}>
+                        <span style={styles.lostHostName}>{h.name}</span>
+                        <span style={styles.lostHostRegion}>{h.region}</span>
+                        <span style={styles.lostHostAttack}>{vuln.name}</span>
+                      </div>
+                      <div style={styles.lostDetail}>
+                        <span style={styles.lostDetailLabel}>FAILED AT</span>
+                        <span style={styles.lostDetailVal}>{failedStage.label} (Stage {h.stageIndex})</span>
+                      </div>
+                      {applied.length > 0 && (
+                        <div style={styles.lostDetail}>
+                          <span style={styles.lostDetailLabel}>APPLIED</span>
+                          <span style={{ ...styles.lostDetailVal, color: C.green }}>{applied.join(", ")}</span>
+                        </div>
+                      )}
+                      {missing.length > 0 && (
+                        <div style={styles.lostDetail}>
+                          <span style={styles.lostDetailLabel}>WOULD HELP</span>
+                          <span style={{ ...styles.lostDetailVal, color: C.yellow }}>{missing.join(" or ")}</span>
+                        </div>
+                      )}
+                      <div style={styles.lostTip}>
+                        <span style={styles.lostTipIcon}>💡</span>
+                        <span>
+                          {applied.length === 0
+                            ? `No mitigations were applied to ${h.name}. Always respond to every spawned host — even a single wrong action is better than none.`
+                            : missing.length > 0
+                            ? `The mitigations applied didn't satisfy the requirement for this stage. Check the Knowledge Base to learn which defenses stop "${failedStage.label}".`
+                            : `Mitigations were applied but escalation wasn't stopped in time. Act faster on Stage ${h.stageIndex} threats — the timer is unforgiving.`}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ ...styles.introFooter, gap: 12 }}>
+                <button style={styles.introBtn} onClick={start}>↺ RETRY MISSION</button>
+                <button
+                  style={{ ...styles.introBtn, borderColor: C.purple, color: C.purple, textShadow: "none" }}
+                  onClick={() => setShowKB(true)}
+                >▶ OPEN KNOWLEDGE BASE</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
