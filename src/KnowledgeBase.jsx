@@ -446,12 +446,15 @@ export default function KnowledgeBase({ onClose, inline = false }) {
                 <div style={styles.stageSubtitle}>What the attacker is doing:</div>
                 <ul style={styles.list}>
                   {s.attackerActions.map((a) => (
-                    <li key={a} style={styles.attackItem}>
+                    <li key={a.label} style={styles.attackItem}>
                       <span style={styles.dot}>●</span>
                       <span>
-                        <span style={styles.actionName}>{a}</span>
-                        {ACTION_GLOSSARY[a] && (
-                          <span style={styles.actionDesc}>{ACTION_GLOSSARY[a]}</span>
+                        <span style={styles.actionName}>
+                          <span style={styles.kbMitreBadge}>{a.mitreId}</span>
+                          {a.label}
+                        </span>
+                        {ACTION_GLOSSARY[a.label] && (
+                          <span style={styles.actionDesc}>{ACTION_GLOSSARY[a.label]}</span>
                         )}
                       </span>
                     </li>
@@ -746,7 +749,18 @@ const styles = {
   },
   list: { margin: 0, paddingLeft: 0, listStyle: "none" },
   attackItem: { display: "flex", gap: 6, fontSize: 11, opacity: 0.90, marginBottom: 8, lineHeight: 1.4, alignItems: "flex-start" },
-  actionName: { display: "block", fontWeight: 700, color: "#c8dde8", marginBottom: 2 },
+  actionName: { display: "flex", alignItems: "baseline", gap: 6, fontWeight: 700, color: "#c8dde8", marginBottom: 2 },
+  kbMitreBadge: {
+    flexShrink: 0,
+    fontSize: 9,
+    fontWeight: 700,
+    color: CK.cyan,
+    border: `1px solid rgba(0,255,247,0.4)`,
+    background: "rgba(0,255,247,0.07)",
+    padding: "1px 5px",
+    letterSpacing: "0.05em",
+    textShadow: `0 0 6px rgba(0,255,247,0.5)`,
+  },
   actionDesc: { display: "block", fontSize: 10.5, color: "rgba(154,180,192,0.75)", lineHeight: 1.55, fontStyle: "italic" },
   dot: { color: CK.red, flexShrink: 0, marginTop: 1, textShadow: "0 0 6px rgba(255,0,60,0.6)" },
   stageContext: {
