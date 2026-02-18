@@ -148,7 +148,7 @@ export default function CapstoneMVP() {
               {running ? "⏸ PAUSE" : "▶ RESUME"}
             </button>
             <button style={styles.btn} onClick={stop}>↺ RESET</button>
-            <button style={styles.kbBtn} onClick={() => setShowKB(true)}>📖 KNOWLEDGE BASE</button>
+            <button style={styles.kbBtn} onClick={openAndScrollToKB}>📖 KNOWLEDGE BASE</button>
           </div>
         </div>
       </header>
