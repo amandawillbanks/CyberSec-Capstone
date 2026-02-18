@@ -14,7 +14,7 @@
   --bg:      #060a0f;
 
   font-family: 'Courier New', Consolas, 'Lucida Console', monospace;
-  font-size: 13px;
+  font-size: 14.3px;
   line-height: 1.5;
   color: #9ab4c0;
   color-scheme: dark;
@@ -31,6 +31,7 @@ html, body {
 body {
   margin: 0;
   display: block;
+  zoom: 1.1;
 }
 
 /* ── Scrollbars ────────────────────────────────────────────────────────── */
