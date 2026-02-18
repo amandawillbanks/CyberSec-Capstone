@@ -24,9 +24,6 @@ export default function GlobeMap({
   statusColor = () => "#00fff7",
   autoRotate = true,
   running = false,
-  // Optional knobs (safe defaults)
-  maxSize = 900, // hard cap in px
-  vw = 60, // % of viewport width to target
 }) {
   const [rotation, setRotation] = useState([0, -15, 0]);
   const rafRef = useRef(null);
@@ -76,18 +73,10 @@ export default function GlobeMap({
     return out;
   }, [hostNodes]);
 
-  /**
-   * KEY FIX:
-   * We constrain the *container* so the SVG can't explode to full screen.
-   * - width: min(maxSize, vw% of viewport)
-   * - aspectRatio: always 1:1 (keeps globe square)
-   * - maxHeight: prevents it from exceeding the viewport height too much
-   */
+  // Fill whatever container (globeFrame) the parent gives us
   const wrapperStyle = {
-    width: `min(${maxSize}px, ${vw}vw)`,
-    aspectRatio: "1 / 1",
-    maxHeight: "85vh",
-    margin: "0 auto",
+    width: "100%",
+    height: "100%",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
