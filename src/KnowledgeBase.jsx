@@ -368,7 +368,7 @@ export default function KnowledgeBase({ onClose, inline = false }) {
   const edu = ATTACK_EDUCATION[selectedId];
 
   const modalStyle = inline
-    ? { ...styles.modal, width: "100%", height: "auto", maxHeight: "60vh", borderRadius: 8 }
+    ? { ...styles.modal, width: "100%", height: "auto", maxHeight: "65vh" }
     : styles.modal;
 
   const modalContent = (
