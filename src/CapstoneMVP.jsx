@@ -22,6 +22,14 @@ export default function CapstoneMVP() {
   const [lostHosts, setLostHosts] = useState([]);
 
   const tickRef = useRef(null);
+  const kbRef = useRef(null);
+
+  function openAndScrollToKB() {
+    setShowKB(true);
+    setTimeout(() => {
+      kbRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 60);
+  }
 
   const selectedHost = useMemo(() => {
     return hosts.find((h) => h.id === selectedHostId) ?? hosts[0];
@@ -284,7 +292,9 @@ export default function CapstoneMVP() {
       </div>
 
       {/* ── Inline Knowledge Base (below grid) ─────────────────── */}
-      {showKB && <KnowledgeBase onClose={() => setShowKB(false)} inline />}
+      <div ref={kbRef}>
+        {showKB && <KnowledgeBase onClose={() => setShowKB(false)} inline />}
+      </div>
 
       {/* ── Intro modal ─────────────────────────────────────────── */}
       {showIntro && (
@@ -387,7 +397,7 @@ export default function CapstoneMVP() {
                 <button style={styles.introBtn} onClick={start}>↺ RETRY MISSION</button>
                 <button
                   style={{ ...styles.introBtn, borderColor: C.purple, color: C.purple, textShadow: "none" }}
-                  onClick={() => setShowKB(true)}
+                  onClick={openAndScrollToKB}
                 >▶ OPEN KNOWLEDGE BASE</button>
               </div>
             </div>
