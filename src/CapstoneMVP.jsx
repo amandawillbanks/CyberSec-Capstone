@@ -17,6 +17,7 @@ export default function CapstoneMVP() {
 
   const [running, setRunning] = useState(false);
   const [score, setScore] = useState(0);
+  const [hoveredBtn, setHoveredBtn] = useState(null);
 
   const [gameState, setGameState] = useState("ready"); // ready | running | won | lost
   const [showKB, setShowKB] = useState(false);
@@ -284,12 +285,15 @@ export default function CapstoneMVP() {
                     const isPending = !!pending;
                     const stage = VULNS[selectedHost.vulnId]?.stages[selectedHost.stageIndex];
                     const isPenalty = stage?.penaltyMitigations?.includes(m.id);
+                    const isHovered = hoveredBtn === m.id;
                     const disabled = already || isPending;
                     return (
                       <button
                         key={m.id}
                         disabled={disabled}
                         onClick={() => applyMitigation(selectedHost.id, m.id)}
+                        onMouseEnter={() => !disabled && setHoveredBtn(m.id)}
+                        onMouseLeave={() => setHoveredBtn(null)}
                         style={{
                           ...styles.actionBtn,
                           opacity: disabled ? 0.5 : 1,
@@ -298,22 +302,19 @@ export default function CapstoneMVP() {
                             ? "rgba(0,255,247,0.15)"
                             : isPending
                             ? C.yellow
-                            : isPenalty
-                            ? "rgba(255,0,60,0.4)"
+                            : isPenalty && isHovered
+                            ? C.red
                             : "rgba(0,255,247,0.5)",
-                          background: isPenalty && !already && !isPending
-                            ? "rgba(255,0,60,0.04)"
+                          background: isPenalty && isHovered && !already && !isPending
+                            ? "rgba(255,0,60,0.08)"
                             : "rgba(0,255,247,0.04)",
                         }}
                       >
                         <div style={styles.actionLabel}>
                           {isPending ? `⏳ ${pending.timeLeft}s…` : m.label}
                         </div>
-                        {!already && !isPending && !isPenalty && (
+                        {!already && !isPending && (
                           <div style={styles.actionMeta}>+{m.points} pts · {MITIGATION_APPLY_TIMES[m.id] ?? 4}s</div>
-                        )}
-                        {!already && !isPending && isPenalty && (
-                          <div style={{ ...styles.actionMeta, color: C.red }}>⚠ wrong tool</div>
                         )}
                         {isPending && (
                           <div style={{ ...styles.actionMeta, color: C.yellow }}>applying…</div>
