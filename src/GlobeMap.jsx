@@ -36,7 +36,7 @@ export default function GlobeMap({
     if (!autoRotate || !running) return;
 
     const tick = () => {
-      setRotation(([lambda, phi, gamma]) => [lambda + 0.25, phi, gamma]);
+      setRotation(([lambda, phi, gamma]) => [lambda + 0.08, phi, gamma]);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);

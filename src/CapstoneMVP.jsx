@@ -735,12 +735,12 @@ const styles = {
   },
 
   mapWrap: {
+    alignSelf: "start",
     border: `1px solid ${C.border}`,
     borderTop: `3px solid ${C.cyan}`,
     background: `linear-gradient(180deg, rgba(0,255,247,0.03) 0%, rgba(6,10,15,0.98) 100%)`,
     boxShadow: `0 0 30px rgba(0,255,247,0.07), inset 0 0 40px rgba(0,0,0,0.5)`,
     padding: 12,
-    minHeight: 560,
     display: "flex",
     flexDirection: "column",
   },
@@ -762,7 +762,8 @@ const styles = {
   },
   globeFrame: {
     flex: 1,
-    minHeight: 460,
+    minHeight: 400,
+    maxHeight: 560,
     border: `1px solid rgba(0,255,247,0.2)`,
     boxShadow: `0 0 40px rgba(0,255,247,0.08), inset 0 0 60px rgba(0,10,20,0.8)`,
     background: [
