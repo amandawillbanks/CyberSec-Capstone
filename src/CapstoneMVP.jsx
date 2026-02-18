@@ -286,7 +286,8 @@ export default function CapstoneMVP() {
                     const stage = VULNS[selectedHost.vulnId]?.stages[selectedHost.stageIndex];
                     const isPenalty = stage?.penaltyMitigations?.includes(m.id);
                     const isHovered = hoveredBtn === m.id;
-                    const disabled = already || isPending;
+                    const isContained = selectedHost.status === "safe" || selectedHost.status === "quarantined";
+                    const disabled = already || isPending || isContained;
                     return (
                       <button
                         key={m.id}
