@@ -20,11 +20,13 @@ export default function CapstoneMVP() {
   const [showKB, setShowKB] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [lostHosts, setLostHosts] = useState([]);
+  const [showDebrief, setShowDebrief] = useState(false);
 
   const tickRef = useRef(null);
   const kbRef = useRef(null);
 
   function openAndScrollToKB() {
+    setShowDebrief(false);
     setShowKB(true);
     setTimeout(() => {
       kbRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -54,6 +56,7 @@ export default function CapstoneMVP() {
       setLostHosts(hosts.filter((h) => h.spawned && h.status === "compromised"));
       setGameState("lost");
       setRunning(false);
+      setShowDebrief(true);
     }
   }, [anyCompromised, gameState, hosts]);
 
@@ -96,6 +99,7 @@ export default function CapstoneMVP() {
     setGameState("running");
     setRunning(true);
     setSelectedHostId(INITIAL_HOSTS[0].id);
+    setShowDebrief(false);
   }
 
   function stop() {
@@ -335,7 +339,7 @@ export default function CapstoneMVP() {
       )}
 
       {/* ── Loss debrief modal ──────────────────────────────────── */}
-      {gameState === "lost" && lostHosts.length > 0 && (
+      {gameState === "lost" && showDebrief && lostHosts.length > 0 && (
         <div style={styles.introOverlay}>
           <div style={{ ...styles.introBox, borderTopColor: C.red, width: "min(700px, 94vw)" }}>
             <div style={{ ...styles.introHeader, borderBottomColor: "rgba(255,0,60,0.25)" }}>
