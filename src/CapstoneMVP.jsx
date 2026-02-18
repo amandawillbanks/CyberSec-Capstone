@@ -189,7 +189,10 @@ export default function CapstoneMVP() {
                 <div style={styles.sectionTitle}>Possible Attacker Actions</div>
                 <ul style={styles.list}>
                   {(currentStage?.attackerActions ?? []).map((a) => (
-                    <li key={a} style={styles.listItem}>{a}</li>
+                    <li key={a.label} style={styles.listItem}>
+                      <span style={styles.mitreBadge}>{a.mitreId}</span>
+                      {a.label}
+                    </li>
                   ))}
                 </ul>
               </div>
@@ -538,7 +541,18 @@ const styles = {
   muted: { color: "rgba(154,180,192,0.5)", fontSize: 12 },
   mutedSmall: { color: "rgba(154,180,192,0.5)", fontSize: 11, lineHeight: 1.5 },
   list: { margin: 0, paddingLeft: 16 },
-  listItem: { fontSize: 11, color: "rgba(200,220,232,0.85)", marginBottom: 5 },
+  listItem: { fontSize: 11, color: "rgba(200,220,232,0.85)", marginBottom: 5, display: "flex", alignItems: "baseline", gap: 6 },
+  mitreBadge: {
+    flexShrink: 0,
+    fontSize: 9,
+    fontWeight: 700,
+    color: C.cyan,
+    border: `1px solid rgba(0,255,247,0.4)`,
+    background: "rgba(0,255,247,0.07)",
+    padding: "1px 5px",
+    letterSpacing: "0.05em",
+    textShadow: `0 0 6px rgba(0,255,247,0.5)`,
+  },
   eventBox: {
     padding: "8px 10px",
     border: "1px solid rgba(0,255,247,0.15)",
