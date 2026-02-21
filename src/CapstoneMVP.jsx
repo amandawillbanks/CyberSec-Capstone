@@ -407,10 +407,10 @@ export default function CapstoneMVP() {
               {/* Steps */}
               <div style={styles.introSteps}>
                 {[
-                  ["-", "MONITOR THE GLOBE", "Hosts spawn in waves roughly every 45 seconds. Yellow markers are active threats. Click any marker to select that host and begin responding."],
-                  ["-", "READ ATTACKER INTEL", "The left panel shows the current attack stage, what the attacker is doing right now, and how long until the threat escalates to the next stage."],
-                  ["-", "APPLY DEFENSES", "The right panel lists available mitigations. The correct action for the current stage stabilizes the host and adds bonus time. Wrong choices cost 20 seconds off the escalation clock."],
-                  ["-", "USE THE KNOWLEDGE BASE", "Open it anytime from the header. It explains every attack type, every attacker technique, and why each defense works — but won't tell you which button to press."],
+                  ["-", "PRESS START TO BEGIN", "Click ▶ START in the top header to launch the mission. Two hosts become active immediately — check the bar below the globe to see when additional hosts will spawn."],
+                  ["-", "WATCH THE TIMERS", "Every active host has a live countdown. If the timer hits zero before you apply the right mitigation, the attack escalates to a worse stage. The left panel shows the stage, attacker actions, and seconds remaining."],
+                  ["-", "APPLY THE RIGHT DEFENSE", "Click a mitigation in the right panel. The correct choice for the current stage stabilizes the host and adds bonus time. Choosing the wrong one subtracts 20 seconds from the countdown — making things worse."],
+                  ["-", "USE THE KNOWLEDGE BASE", "Open it anytime from the header. It explains every attack type, every attacker technique, and why each defense works — but won't tell you exactly which button to press."],
                 ].map(([num, title, text]) => (
                   <div key={num} style={styles.introStep}>
                     <span style={styles.introStepNum}>{num}</span>
