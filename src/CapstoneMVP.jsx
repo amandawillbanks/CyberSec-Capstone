@@ -2,6 +2,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import GlobeMap from "./GlobeMap.jsx";
 import KnowledgeBase from "./KnowledgeBase.jsx";
+import AIPanel from "./AIPanel.jsx";
+import { QAgent } from "./sim/aiAgent.js";
 import { INITIAL_HOSTS, VULNS } from "./CapstoneData.js";
 import {
   makeInitialHosts,
@@ -27,6 +29,19 @@ export default function CapstoneMVP() {
 
   const tickRef = useRef(null);
   const kbRef = useRef(null);
+
+  // ── AI mode state ────────────────────────────────────────────────────────
+  const [aiMode, setAiMode]                 = useState(false);
+  const [aiSpeed, setAiSpeed]               = useState(1); // 1 | 2 | 5
+  const [aiLastDecision, setAiLastDecision] = useState(null);
+  const [aiStats, setAiStats]               = useState({ episodes: 0, wins: 0, scoreHistory: [], epsilon: 0.9 });
+  const aiAgentRef        = useRef(null);   // QAgent instance
+  const lastActionPerHost = useRef({});     // { hostId: { stateKey, action } }
+  const aiActionTickRef   = useRef(null);   // AI decision interval
+  const hostsRef          = useRef(hosts);  // mirror for interval closures
+  const gameStateRef      = useRef("ready");
+  const scoreRef          = useRef(0);
+  const prevStatusRef     = useRef({});
 
   function openAndScrollToKB() {
     setShowDebrief(false);
@@ -78,7 +93,19 @@ export default function CapstoneMVP() {
     }
   }, [hosts, gameState]);
 
-  // Tick loop
+  // ── Mirror refs (keep closures current) ────────────────────────────────────
+  useEffect(() => { hostsRef.current     = hosts;     }, [hosts]);
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+  useEffect(() => { scoreRef.current     = score;     }, [score]);
+
+  // ── Init QAgent on mount (loads persisted Q-table from localStorage) ────────
+  useEffect(() => {
+    const agent = new QAgent();
+    aiAgentRef.current = agent;
+    setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], epsilon: agent.epsilon });
+  }, []);
+
+  // ── Tick loop (speed-aware in AI mode) ──────────────────────────────────────
   useEffect(() => {
     if (!running) {
       if (tickRef.current) clearInterval(tickRef.current);
@@ -86,15 +113,122 @@ export default function CapstoneMVP() {
       return;
     }
 
+    const tickMs = aiMode ? Math.round(1000 / aiSpeed) : 1000;
     tickRef.current = setInterval(() => {
       setHosts((prev) => stepSimulationPure(prev, gameState));
-    }, 1000);
+    }, tickMs);
 
     return () => {
       if (tickRef.current) clearInterval(tickRef.current);
       tickRef.current = null;
     };
-  }, [running, gameState]);
+  }, [running, gameState, aiMode, aiSpeed]);
+
+  // ── AI action loop ───────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!aiMode || !running) {
+      if (aiActionTickRef.current) clearInterval(aiActionTickRef.current);
+      aiActionTickRef.current = null;
+      return;
+    }
+
+    aiActionTickRef.current = setInterval(() => {
+      if (gameStateRef.current !== "running") return;
+      const agent = aiAgentRef.current;
+      if (!agent) return;
+
+      const currentHosts = hostsRef.current;
+      const candidates = currentHosts
+        .filter(h => h.spawned && h.status !== "safe" && h.status !== "quarantined")
+        .sort((a, b) => {
+          if (a.status === "compromised" && b.status !== "compromised") return -1;
+          if (b.status === "compromised" && a.status !== "compromised") return 1;
+          return a.stageTimeLeft - b.stageTimeLeft;
+        });
+
+      if (candidates.length === 0) return;
+      const host = candidates[0];
+      const vuln = VULNS[host.vulnId];
+      const stage = vuln.stages[host.stageIndex];
+
+      const availableActions = vuln.mitigations
+        .filter(m =>
+          !host.appliedMitigations.includes(m.id) &&
+          !host.pendingMitigations?.some(p => p.id === m.id)
+        )
+        .map(m => m.id);
+
+      if (availableActions.length === 0) return;
+
+      const stateKey     = agent.encodeState(host);
+      const chosenAction = agent.chooseAction(host, availableActions);
+      if (!chosenAction) return;
+
+      const isPenalty       = stage.penaltyMitigations?.includes(chosenAction) ?? false;
+      const mitDef          = vuln.mitigations.find(x => x.id === chosenAction);
+      const immediateReward = isPenalty ? -20 : (mitDef?.points ?? 0);
+
+      // Record for retroactive rewards when host status changes
+      lastActionPerHost.current[host.id] = { stateKey, action: chosenAction };
+
+      // Apply mitigation (same path as player click)
+      applyMitigation(host.id, chosenAction);
+
+      // Approximate next state key (mitigation is now pending, appliedCount +1)
+      const urg         = host.stageTimeLeft <= 20 ? "hi" : host.stageTimeLeft <= 40 ? "med" : "lo";
+      const nextApplied = Math.min(host.appliedMitigations.length + 1, 2);
+      const nextStateKey = `${host.vulnId}:${host.stageIndex}:${urg}:${nextApplied}`;
+      const remaining    = availableActions.filter(a => a !== chosenAction);
+
+      agent.updateQ(stateKey, chosenAction, immediateReward, nextStateKey, remaining);
+      setAiLastDecision({ hostName: host.name, mitigationId: chosenAction, reward: immediateReward });
+
+    }, Math.round(2000 / aiSpeed));
+
+    return () => {
+      if (aiActionTickRef.current) clearInterval(aiActionTickRef.current);
+      aiActionTickRef.current = null;
+    };
+  }, [aiMode, running, aiSpeed]);
+
+  // ── Retroactive rewards when host status changes ─────────────────────────────
+  useEffect(() => {
+    const agent = aiAgentRef.current;
+    if (!aiMode || !agent) {
+      prevStatusRef.current = Object.fromEntries(hosts.map(h => [h.id, h.status]));
+      return;
+    }
+
+    hosts.forEach(host => {
+      const prev       = prevStatusRef.current[host.id];
+      const lastAction = lastActionPerHost.current[host.id];
+      if (prev === undefined || !lastAction) return;
+
+      if (prev !== "safe" && prev !== "quarantined" &&
+          (host.status === "safe" || host.status === "quarantined")) {
+        agent.updateQ(lastAction.stateKey, lastAction.action, 80, lastAction.stateKey, []);
+      }
+      if (prev !== "compromised" && host.status === "compromised") {
+        agent.updateQ(lastAction.stateKey, lastAction.action, -100, lastAction.stateKey, []);
+      }
+    });
+
+    prevStatusRef.current = Object.fromEntries(hosts.map(h => [h.id, h.status]));
+  }, [hosts, aiMode]);
+
+  // ── AI episode auto-restart ──────────────────────────────────────────────────
+  useEffect(() => {
+    if (!aiMode) return;
+    if (gameState === "won" || gameState === "lost") {
+      const agent = aiAgentRef.current;
+      if (!agent) return;
+      agent.onEpisodeEnd(gameState === "won", scoreRef.current);
+      setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], epsilon: agent.epsilon });
+      lastActionPerHost.current = {};
+      const t = setTimeout(() => start(), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [gameState, aiMode]);
 
   function start() {
     setHosts(makeInitialHosts());
@@ -120,6 +254,24 @@ export default function CapstoneMVP() {
 
   function dismissPenalty(hostId) {
     setHosts((prev) => clearPenaltyMessagePure(prev, hostId));
+  }
+
+  function toggleAiMode() {
+    const newMode = !aiMode;
+    setAiMode(newMode);
+    if (newMode) {
+      const agent = aiAgentRef.current;
+      if (agent) setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], epsilon: agent.epsilon });
+      if (gameState === "ready" || gameState === "won" || gameState === "lost") start();
+    }
+  }
+
+  function resetAI() {
+    const agent = aiAgentRef.current;
+    if (agent) { agent.reset(); }
+    setAiStats({ episodes: 0, wins: 0, scoreHistory: [], epsilon: 0.9 });
+    setAiLastDecision(null);
+    lastActionPerHost.current = {};
   }
 
   const statusColor = (status) => {
@@ -156,11 +308,32 @@ export default function CapstoneMVP() {
             </button>
             <button style={styles.btn} onClick={stop}>↺ RESET</button>
             <button style={styles.kbBtn} onClick={openAndScrollToKB}>📖 KNOWLEDGE BASE</button>
+            <button
+              style={{
+                ...styles.kbBtn,
+                borderColor: aiMode ? "rgba(136,85,255,0.85)" : "rgba(136,85,255,0.4)",
+                background:  aiMode ? "rgba(136,85,255,0.22)" : "rgba(136,85,255,0.06)",
+                color:       aiMode ? "#dd99ff"               : "#bb99ff",
+                boxShadow:   aiMode ? "0 0 14px rgba(136,85,255,0.35)" : "none",
+              }}
+              onClick={toggleAiMode}
+            >🤖 SENTINEL{aiMode ? " ON" : ""}</button>
           </div>
         </div>
       </header>
 
       {/* KB rendered inline below the grid — see bottom of return */}
+
+      {/* ── Sentinel Cerberus AI panel ──────────────────────────── */}
+      {aiMode && (
+        <AIPanel
+          stats={aiStats}
+          aiSpeed={aiSpeed}
+          onSpeedChange={setAiSpeed}
+          onReset={resetAI}
+          lastDecision={aiLastDecision}
+        />
+      )}
 
       {/* ── 3-col grid ─────────────────────────────────────────── */}
       <div style={styles.grid}>
