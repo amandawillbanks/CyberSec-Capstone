@@ -351,31 +351,89 @@ export default function CapstoneMVP() {
       {/* ── Intro modal ─────────────────────────────────────────── */}
       {showIntro && (
         <div style={styles.introOverlay}>
-          <div style={styles.introBox}>
+          <div style={{ ...styles.introBox, width: "min(700px, 95vw)", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={styles.introHeader}>
               <span style={styles.introBlink}>▌</span>
               <span style={styles.introHeaderText}>SYSTEM ALERT — INCOMING THREAT DETECTION</span>
               <span style={styles.introBlink}>▌</span>
             </div>
             <div style={styles.introBody}>
+
+              {/* Role briefing */}
               <div style={styles.introWarning}>
-                ⚠ CRITICAL: Your network is reporting active host compromise events. Multiple endpoints
-                are exhibiting indicators of attack across global infrastructure nodes. Threat actors are
-                escalating — time is limited.
+                ⚠ CRITICAL: 10 global infrastructure nodes are reporting active intrusion events across
+                multiple attack vectors. You are the on-call SOC analyst. Identify the correct defensive
+                responses and contain every host before threat actors achieve persistent access.
               </div>
+
+              {/* Interface overview */}
+              <div>
+                <div style={styles.sectionTitle}>Interface Overview</div>
+                <div style={styles.introPanelGrid}>
+                  {[
+                    { title: "◀ Attacker Intel", desc: "Active stage, attacker techniques, escalation timer, and last event for the selected host." },
+                    { title: "● Globe", desc: "10 global hosts spawn in waves over ~6 min. Click a marker to select it. Colors show status." },
+                    { title: "Defense Actions ▶", desc: "Available mitigations for the selected host. Apply the right one to stabilize the threat." },
+                  ].map(({ title, desc }) => (
+                    <div key={title} style={styles.introPanelCard}>
+                      <div style={styles.introPanelTitle}>{title}</div>
+                      <div style={styles.introPanelDesc}>{desc}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Status legend */}
+              <div>
+                <div style={styles.sectionTitle}>Host Status Colors</div>
+                <div style={styles.introStatusRow}>
+                  {[
+                    { label: "WARNING", color: C.yellow, desc: "Active threat — timer running" },
+                    { label: "SAFE", color: C.green, desc: "Correctly contained" },
+                    { label: "QUARANTINED", color: "#66b3ff", desc: "Isolated, no longer escalating" },
+                    { label: "COMPROMISED", color: C.red, desc: "Attack succeeded — mission at risk" },
+                  ].map(({ label, color, desc }) => (
+                    <div key={label} style={styles.introStatusChip}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ width: 8, height: 8, display: "inline-block", background: color, boxShadow: `0 0 5px ${color}`, flexShrink: 0 }} />
+                        <span style={{ color, fontWeight: 700, fontSize: 10, letterSpacing: "0.1em" }}>{label}</span>
+                      </div>
+                      <span style={{ fontSize: 10, color: "rgba(154,180,192,0.65)", marginTop: 2 }}>{desc}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Steps */}
               <div style={styles.introSteps}>
                 {[
-                  ["01", "Review incoming alerts on the Global Threat Globe — hosts will spawn as threats are detected."],
-                  ["02", "Select a host to view attacker activity and available mitigations in the right panel."],
-                  ["03", "Consult the Knowledge Base to understand attack techniques and why defenses work — don't just guess."],
-                  ["04", "Contain all hosts before 2 become compromised or the mission fails."],
-                ].map(([num, text]) => (
+                  ["01", "MONITOR THE GLOBE", "Hosts spawn in waves roughly every 45 seconds. Yellow markers are active threats. Click any marker to select that host and begin responding."],
+                  ["02", "READ ATTACKER INTEL", "The left panel shows the current attack stage, what the attacker is doing right now, and how long until the threat escalates to the next stage."],
+                  ["03", "APPLY DEFENSES", "The right panel lists available mitigations. The correct action for the current stage stabilizes the host and adds bonus time. Wrong choices cost 20 seconds off the escalation clock."],
+                  ["04", "USE THE KNOWLEDGE BASE", "Open it anytime from the header. It explains every attack type, every attacker technique, and why each defense works — but won't tell you which button to press."],
+                ].map(([num, title, text]) => (
                   <div key={num} style={styles.introStep}>
                     <span style={styles.introStepNum}>{num}</span>
-                    <span>{text}</span>
+                    <span>
+                      <span style={{ fontWeight: 700, color: C.cyan, textTransform: "uppercase", letterSpacing: "0.08em", fontSize: 11 }}>{title} — </span>
+                      {text}
+                    </span>
                   </div>
                 ))}
               </div>
+
+              {/* Win/Lose conditions */}
+              <div style={styles.introConditions}>
+                <div style={styles.introConditionWin}>
+                  <span style={{ color: C.green, fontWeight: 700, fontSize: 10, letterSpacing: "0.12em", flexShrink: 0 }}>WIN</span>
+                  <span style={{ fontSize: 11, color: "rgba(150,220,180,0.85)" }}>All 10 hosts contained — status safe or quarantined</span>
+                </div>
+                <div style={styles.introConditionLose}>
+                  <span style={{ color: C.red, fontWeight: 700, fontSize: 10, letterSpacing: "0.12em", flexShrink: 0 }}>LOSE</span>
+                  <span style={{ fontSize: 11, color: "rgba(220,150,150,0.85)" }}>2 or more hosts simultaneously compromised</span>
+                </div>
+              </div>
+
               <div style={styles.introFooter}>
                 <button style={styles.introBtn} onClick={() => setShowIntro(false)}>
                   ▶ ACKNOWLEDGE &amp; ENTER OPERATIONS CENTER
@@ -821,6 +879,72 @@ const styles = {
     textShadow: `0 0 12px rgba(0,255,247,0.6)`,
     boxShadow: `0 0 20px rgba(0,255,247,0.12)`,
     cursor: "pointer",
+  },
+
+  // ── Intro modal extras ─────────────────────────────────────────────────────
+  introPanelGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: 8,
+  },
+  introPanelCard: {
+    padding: "10px 12px",
+    border: "1px solid rgba(0,255,247,0.15)",
+    borderTop: `2px solid rgba(0,255,247,0.4)`,
+    background: "rgba(0,255,247,0.025)",
+  },
+  introPanelTitle: {
+    fontSize: 10,
+    fontWeight: 700,
+    color: C.cyan,
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+    marginBottom: 6,
+    textShadow: "0 0 8px rgba(0,255,247,0.4)",
+  },
+  introPanelDesc: {
+    fontSize: 11,
+    color: "rgba(154,180,192,0.75)",
+    lineHeight: 1.55,
+  },
+  introStatusRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: 8,
+  },
+  introStatusChip: {
+    display: "flex",
+    flexDirection: "column",
+    padding: "7px 10px",
+    border: "1px solid rgba(154,180,192,0.1)",
+    background: "rgba(0,0,0,0.2)",
+  },
+  introConditions: {
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  introConditionWin: {
+    flex: 1,
+    minWidth: 200,
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 12px",
+    border: "1px solid rgba(0,255,136,0.2)",
+    borderLeft: "3px solid rgba(0,255,136,0.6)",
+    background: "rgba(0,255,136,0.04)",
+  },
+  introConditionLose: {
+    flex: 1,
+    minWidth: 200,
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    padding: "8px 12px",
+    border: "1px solid rgba(255,0,60,0.2)",
+    borderLeft: "3px solid rgba(255,0,60,0.6)",
+    background: "rgba(255,0,60,0.04)",
   },
 
   // ── Penalty banner ─────────────────────────────────────────────────────────
