@@ -215,7 +215,7 @@ export default function CapstoneMVP() {
         {/* Center: Globe */}
         <main style={styles.mapWrap}>
           <div style={styles.mapTitleRow}>
-            <div style={styles.mapTitle}>Global Threat Globe</div>
+            <div style={styles.mapTitle}>Global Threat Map</div>
           </div>
 
           <div style={styles.globeFrame}>
