@@ -1,7 +1,7 @@
 // src/AIPanel.jsx
 // Dashboard shown below the header when AI Mode is active.
 // Displays episode stats, win rate, exploration rate, score sparkline,
-// last decision, and speed controls.
+// last decision, speed controls, and a scrollable per-episode run log.
 
 const C = {
   cyan:   "#00fff7",
@@ -14,11 +14,17 @@ const C = {
 const SPARK_W = 220;
 const SPARK_H = 36;
 
-export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDecision }) {
-  const { episodes, wins, scoreHistory, epsilon } = stats;
+function fmtDuration(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
 
-  const winRate       = episodes > 0 ? wins / episodes : 0;
-  const winPct        = Math.round(winRate * 100);
+export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDecision }) {
+  const { episodes, wins, scoreHistory, episodeLog = [], epsilon } = stats;
+
+  const winRate        = episodes > 0 ? wins / episodes : 0;
+  const winPct         = Math.round(winRate * 100);
   const explorationPct = Math.round(epsilon * 100);
 
   // Build SVG sparkline from last 30 scores
@@ -40,12 +46,19 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
     ? SPARK_H - ((spark[spark.length - 1] - minS) / range) * SPARK_H
     : SPARK_H / 2;
 
+  // Show newest episodes first
+  const logRows = [...episodeLog].reverse();
+
   return (
     <div style={styles.panel}>
       {/* ── Header row ──────────────────────────────────────────── */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
-          <img src="/CyberSec-Capstone/SentinelCerberus.png" alt="" style={{ height: 28, width: 28, objectFit: "contain", marginRight: 8, verticalAlign: "middle" }} />
+          <img
+            src="/CyberSec-Capstone/SentinelCerberus.png"
+            alt="Sentinel Cerberus"
+            style={{ height: 42, width: 42, objectFit: "contain", marginRight: 10, verticalAlign: "middle", filter: "drop-shadow(0 0 6px rgba(136,85,255,0.7))" }}
+          />
           <span style={styles.title}>SENTINEL CERBERUS — AI MODE</span>
           <span style={styles.epLabel}>Episode <span style={styles.epNum}>{episodes}</span></span>
           <span style={{ ...styles.epLabel, color: C.green }}>Wins <span style={{ fontWeight: 700 }}>{wins}</span></span>
@@ -65,76 +78,120 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
         </div>
       </div>
 
-      {/* ── Metrics row ──────────────────────────────────────────── */}
-      <div style={styles.body}>
-        {/* Win rate */}
-        <div style={styles.metric}>
-          <span style={styles.metricLabel}>WIN RATE</span>
-          <div style={styles.barRow}>
-            <div style={styles.barTrack}>
-              <div style={{ ...styles.barFill, width: `${winPct}%`, background: C.green }} />
-            </div>
-            <span style={{ ...styles.metricVal, color: C.green }}>{winPct}%</span>
-          </div>
-        </div>
+      {/* ── Metrics + Log row ────────────────────────────────────── */}
+      <div style={styles.bodyRow}>
 
-        {/* Exploration */}
-        <div style={styles.metric}>
-          <span style={styles.metricLabel}>EXPLORING ε</span>
-          <div style={styles.barRow}>
-            <div style={styles.barTrack}>
-              <div style={{ ...styles.barFill, width: `${explorationPct}%`, background: C.yellow }} />
+        {/* Left: metrics */}
+        <div style={styles.metrics}>
+          {/* Win rate */}
+          <div style={styles.metric}>
+            <span style={styles.metricLabel}>WIN RATE</span>
+            <div style={styles.barRow}>
+              <div style={styles.barTrack}>
+                <div style={{ ...styles.barFill, width: `${winPct}%`, background: C.green }} />
+              </div>
+              <span style={{ ...styles.metricVal, color: C.green }}>{winPct}%</span>
             </div>
-            <span style={{ ...styles.metricVal, color: C.yellow }}>{explorationPct}%</span>
           </div>
-          <span style={styles.metricHint}>
-            {epsilon > 0.6 ? "random" : epsilon > 0.25 ? "learning" : "smart"}
-          </span>
-        </div>
 
-        {/* Score sparkline */}
-        <div style={styles.metric}>
-          <span style={styles.metricLabel}>SCORE TREND</span>
-          <div style={styles.sparkBox}>
-            {spark.length < 2 ? (
-              <span style={styles.sparkEmpty}>play more episodes…</span>
+          {/* Exploration */}
+          <div style={styles.metric}>
+            <span style={styles.metricLabel}>EXPLORING ε</span>
+            <div style={styles.barRow}>
+              <div style={styles.barTrack}>
+                <div style={{ ...styles.barFill, width: `${explorationPct}%`, background: C.yellow }} />
+              </div>
+              <span style={{ ...styles.metricVal, color: C.yellow }}>{explorationPct}%</span>
+            </div>
+            <span style={styles.metricHint}>
+              {epsilon > 0.6 ? "random" : epsilon > 0.25 ? "learning" : "smart"}
+            </span>
+          </div>
+
+          {/* Score sparkline */}
+          <div style={styles.metric}>
+            <span style={styles.metricLabel}>SCORE TREND</span>
+            <div style={styles.sparkBox}>
+              {spark.length < 2 ? (
+                <span style={styles.sparkEmpty}>play more episodes…</span>
+              ) : (
+                <svg width={SPARK_W} height={SPARK_H} style={{ overflow: "visible", display: "block" }}>
+                  <line x1="0" y1={SPARK_H} x2={SPARK_W} y2={SPARK_H}
+                    stroke="rgba(0,255,247,0.1)" strokeWidth="1" />
+                  <polyline
+                    points={sparkPoints}
+                    fill="none"
+                    stroke={C.cyan}
+                    strokeWidth="1.5"
+                    opacity="0.8"
+                  />
+                  <circle cx={lastDotX} cy={lastDotY} r="3" fill={C.cyan} opacity="0.9" />
+                </svg>
+              )}
+            </div>
+          </div>
+
+          {/* Last decision */}
+          <div style={styles.decisionBox}>
+            <span style={styles.metricLabel}>LAST ACTION</span>
+            {lastDecision ? (
+              <div style={styles.decisionContent}>
+                <span style={{ color: C.cyan, fontWeight: 700 }}>{lastDecision.mitigationId}</span>
+                <span style={styles.decisionArrow}>→</span>
+                <span style={{ color: "#c8dde8" }}>{lastDecision.hostName}</span>
+                <span style={{ ...styles.decisionReward, color: lastDecision.reward >= 0 ? C.green : C.red }}>
+                  {lastDecision.reward >= 0 ? "+" : ""}{lastDecision.reward}
+                </span>
+              </div>
             ) : (
-              <svg width={SPARK_W} height={SPARK_H} style={{ overflow: "visible", display: "block" }}>
-                {/* Baseline */}
-                <line x1="0" y1={SPARK_H} x2={SPARK_W} y2={SPARK_H}
-                  stroke="rgba(0,255,247,0.1)" strokeWidth="1" />
-                <polyline
-                  points={sparkPoints}
-                  fill="none"
-                  stroke={C.cyan}
-                  strokeWidth="1.5"
-                  opacity="0.8"
-                />
-                <circle cx={lastDotX} cy={lastDotY} r="3" fill={C.cyan} opacity="0.9" />
-              </svg>
+              <span style={styles.sparkEmpty}>waiting for first action…</span>
             )}
           </div>
         </div>
 
-        {/* Last decision */}
-        <div style={styles.decisionBox}>
-          <span style={styles.metricLabel}>LAST ACTION</span>
-          {lastDecision ? (
-            <div style={styles.decisionContent}>
-              <span style={{ color: C.cyan, fontWeight: 700 }}>{lastDecision.mitigationId}</span>
-              <span style={styles.decisionArrow}>→</span>
-              <span style={{ color: "#c8dde8" }}>{lastDecision.hostName}</span>
-              <span style={{
-                ...styles.decisionReward,
-                color: lastDecision.reward >= 0 ? C.green : C.red,
-              }}>
-                {lastDecision.reward >= 0 ? "+" : ""}{lastDecision.reward}
-              </span>
+        {/* Right: episode run log */}
+        <div style={styles.logSection}>
+          <div style={styles.logHeader}>
+            <span style={styles.metricLabel}>RUN LOG</span>
+            <span style={{ ...styles.metricLabel, marginLeft: "auto", opacity: 0.5 }}>newest first</span>
+          </div>
+          <div style={styles.logTable}>
+            {/* Column headers */}
+            <div style={{ ...styles.logRow, ...styles.logHeaderRow }}>
+              <span style={styles.logColEp}>EP</span>
+              <span style={styles.logColResult}>RESULT</span>
+              <span style={styles.logColScore}>SCORE</span>
+              <span style={styles.logColTime}>TIME</span>
             </div>
-          ) : (
-            <span style={styles.sparkEmpty}>waiting for first action…</span>
-          )}
+            {/* Rows */}
+            {logRows.length === 0 ? (
+              <div style={styles.logEmpty}>No episodes yet — Sentinel is warming up…</div>
+            ) : (
+              logRows.map(row => (
+                <div
+                  key={row.ep}
+                  style={{
+                    ...styles.logRow,
+                    background: row.won
+                      ? "rgba(0,255,136,0.04)"
+                      : "rgba(255,0,60,0.04)",
+                    borderLeft: `2px solid ${row.won ? "rgba(0,255,136,0.35)" : "rgba(255,0,60,0.35)"}`,
+                  }}
+                >
+                  <span style={styles.logColEp}>{row.ep}</span>
+                  <span style={{ ...styles.logColResult, color: row.won ? C.green : C.red, fontWeight: 700 }}>
+                    {row.won ? "WIN" : "LOSS"}
+                  </span>
+                  <span style={{ ...styles.logColScore, color: "#c8dde8" }}>{row.score}</span>
+                  <span style={{ ...styles.logColTime, color: "rgba(187,153,255,0.7)" }}>
+                    {fmtDuration(row.durationSec)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
+
       </div>
     </div>
   );
@@ -227,12 +284,21 @@ const styles = {
     cursor: "pointer",
     fontFamily: "'Courier New', Consolas, monospace",
   },
-  body: {
+
+  // ── Body: metrics left + log right ─────────────────────────────────────────
+  bodyRow: {
     display: "flex",
-    alignItems: "center",
-    gap: 24,
-    padding: "8px 16px",
+    gap: 0,
+    alignItems: "stretch",
+  },
+  metrics: {
+    display: "flex",
     flexWrap: "wrap",
+    alignItems: "center",
+    gap: 20,
+    padding: "8px 16px",
+    flex: "1 1 auto",
+    borderRight: "1px solid rgba(136,85,255,0.15)",
   },
   metric: {
     display: "flex",
@@ -290,11 +356,10 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: 4,
-    marginLeft: "auto",
     padding: "6px 12px",
     border: "1px solid rgba(0,255,247,0.1)",
     background: "rgba(0,0,0,0.25)",
-    minWidth: 260,
+    minWidth: 240,
   },
   decisionContent: {
     display: "flex",
@@ -312,4 +377,47 @@ const styles = {
     fontWeight: 700,
     letterSpacing: "0.06em",
   },
+
+  // ── Run log ─────────────────────────────────────────────────────────────────
+  logSection: {
+    width: 320,
+    flexShrink: 0,
+    display: "flex",
+    flexDirection: "column",
+  },
+  logHeader: {
+    display: "flex",
+    alignItems: "center",
+    padding: "6px 12px 4px",
+    borderBottom: "1px solid rgba(136,85,255,0.12)",
+  },
+  logTable: {
+    overflowY: "auto",
+    maxHeight: 160,
+    display: "flex",
+    flexDirection: "column",
+  },
+  logHeaderRow: {
+    background: "rgba(136,85,255,0.08)",
+    borderBottom: "1px solid rgba(136,85,255,0.15)",
+    position: "sticky",
+    top: 0,
+  },
+  logRow: {
+    display: "flex",
+    alignItems: "center",
+    padding: "4px 12px",
+    fontSize: 11,
+    borderBottom: "1px solid rgba(136,85,255,0.07)",
+  },
+  logEmpty: {
+    padding: "10px 12px",
+    fontSize: 10,
+    color: "rgba(187,153,255,0.3)",
+    fontStyle: "italic",
+  },
+  logColEp:     { width: 36,  flexShrink: 0, color: "rgba(187,153,255,0.5)", fontSize: 10 },
+  logColResult: { width: 50,  flexShrink: 0, fontSize: 10, letterSpacing: "0.08em" },
+  logColScore:  { width: 60,  flexShrink: 0, fontSize: 11 },
+  logColTime:   { flex: 1,    fontSize: 11, textAlign: "right" },
 };

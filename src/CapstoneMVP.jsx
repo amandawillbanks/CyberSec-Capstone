@@ -34,7 +34,7 @@ export default function CapstoneMVP() {
   const [aiMode, setAiMode]                 = useState(false);
   const [aiSpeed, setAiSpeed]               = useState(1); // 1 | 2 | 5
   const [aiLastDecision, setAiLastDecision] = useState(null);
-  const [aiStats, setAiStats]               = useState({ episodes: 0, wins: 0, scoreHistory: [], epsilon: 0.9 });
+  const [aiStats, setAiStats]               = useState({ episodes: 0, wins: 0, scoreHistory: [], episodeLog: [], epsilon: 0.9 });
   const aiAgentRef        = useRef(null);   // QAgent instance
   const lastActionPerHost = useRef({});     // { hostId: { stateKey, action } }
   const aiActionTickRef   = useRef(null);   // AI decision interval
@@ -42,6 +42,7 @@ export default function CapstoneMVP() {
   const gameStateRef      = useRef("ready");
   const scoreRef          = useRef(0);
   const prevStatusRef     = useRef({});
+  const episodeStartRef   = useRef(null);   // Date.now() when current episode started
 
   function openAndScrollToKB() {
     setShowDebrief(false);
@@ -102,7 +103,7 @@ export default function CapstoneMVP() {
   useEffect(() => {
     const agent = new QAgent();
     aiAgentRef.current = agent;
-    setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], epsilon: agent.epsilon });
+    setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], episodeLog: [...agent.episodeLog], epsilon: agent.epsilon });
   }, []);
 
   // ── Tick loop (speed-aware in AI mode) ──────────────────────────────────────
@@ -222,8 +223,11 @@ export default function CapstoneMVP() {
     if (gameState === "won" || gameState === "lost") {
       const agent = aiAgentRef.current;
       if (!agent) return;
-      agent.onEpisodeEnd(gameState === "won", scoreRef.current);
-      setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], epsilon: agent.epsilon });
+      const durationSec = episodeStartRef.current
+        ? Math.round((Date.now() - episodeStartRef.current) / 1000)
+        : 0;
+      agent.onEpisodeEnd(gameState === "won", scoreRef.current, durationSec);
+      setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], episodeLog: [...agent.episodeLog], epsilon: agent.epsilon });
       lastActionPerHost.current = {};
       const t = setTimeout(() => start(), 1500);
       return () => clearTimeout(t);
@@ -231,6 +235,7 @@ export default function CapstoneMVP() {
   }, [gameState, aiMode]);
 
   function start() {
+    episodeStartRef.current = Date.now();
     setHosts(makeInitialHosts());
     setScore(0);
     setGameState("running");
@@ -261,7 +266,7 @@ export default function CapstoneMVP() {
     setAiMode(newMode);
     if (newMode) {
       const agent = aiAgentRef.current;
-      if (agent) setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], epsilon: agent.epsilon });
+      if (agent) setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], episodeLog: [...agent.episodeLog], epsilon: agent.epsilon });
       if (gameState === "ready" || gameState === "won" || gameState === "lost") start();
     }
   }
@@ -269,7 +274,7 @@ export default function CapstoneMVP() {
   function resetAI() {
     const agent = aiAgentRef.current;
     if (agent) { agent.reset(); }
-    setAiStats({ episodes: 0, wins: 0, scoreHistory: [], epsilon: 0.9 });
+    setAiStats({ episodes: 0, wins: 0, scoreHistory: [], episodeLog: [], epsilon: 0.9 });
     setAiLastDecision(null);
     lastActionPerHost.current = {};
   }
@@ -321,7 +326,7 @@ export default function CapstoneMVP() {
               <img
                 src="/CyberSec-Capstone/SentinelCerberus.png"
                 alt="Sentinel Cerberus"
-                style={{ height: 22, width: 22, objectFit: "contain", verticalAlign: "middle", marginRight: 6, filter: aiMode ? "none" : "grayscale(40%) brightness(0.8)" }}
+                style={{ height: 36, width: 36, objectFit: "contain", verticalAlign: "middle", marginRight: 6, filter: aiMode ? "drop-shadow(0 0 5px rgba(136,85,255,0.8))" : "grayscale(40%) brightness(0.75)" }}
               />
               SENTINEL{aiMode ? " ON" : ""}
             </button>

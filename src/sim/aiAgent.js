@@ -30,6 +30,7 @@ export class QAgent {
     this.episodes     = 0;
     this.wins         = 0;
     this.scoreHistory = [];   // last 50 episode scores
+    this.episodeLog   = [];   // last 50 full records { ep, won, score, durationSec }
     this.epsilon      = EPSILON_START;
     this.load();
   }
@@ -79,11 +80,13 @@ export class QAgent {
   }
 
   // ── Episode bookkeeping ──────────────────────────────────────────────────────
-  onEpisodeEnd(won, score) {
+  onEpisodeEnd(won, score, durationSec) {
     this.episodes++;
     if (won) this.wins++;
     this.scoreHistory.push(score);
     if (this.scoreHistory.length > 50) this.scoreHistory.shift();
+    this.episodeLog.push({ ep: this.episodes, won, score, durationSec: durationSec ?? 0 });
+    if (this.episodeLog.length > 50) this.episodeLog.shift();
     // Decay exploration rate
     this.epsilon = Math.max(
       EPSILON_MIN,
@@ -104,7 +107,8 @@ export class QAgent {
         episodes:     this.episodes,
         wins:         this.wins,
         scoreHistory: this.scoreHistory,
-        version:      1,
+        episodeLog:   this.episodeLog,
+        version:      2,
       }));
     } catch (_) { /* storage quota or unavailable */ }
   }
@@ -114,11 +118,12 @@ export class QAgent {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const data = JSON.parse(raw);
-      if (data?.version === 1) {
+      if (data?.version >= 1) {
         this.qtable       = data.qtable       ?? {};
         this.episodes     = data.episodes     ?? 0;
         this.wins         = data.wins         ?? 0;
         this.scoreHistory = data.scoreHistory ?? [];
+        this.episodeLog   = data.episodeLog   ?? [];
         // Restore epsilon to where it would be after this many episodes
         this.epsilon = Math.max(
           EPSILON_MIN,
@@ -133,6 +138,7 @@ export class QAgent {
     this.episodes     = 0;
     this.wins         = 0;
     this.scoreHistory = [];
+    this.episodeLog   = [];
     this.epsilon      = EPSILON_START;
     try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
   }
