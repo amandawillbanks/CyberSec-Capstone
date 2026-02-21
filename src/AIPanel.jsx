@@ -45,7 +45,8 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
       {/* ── Header row ──────────────────────────────────────────── */}
       <div style={styles.header}>
         <div style={styles.headerLeft}>
-          <span style={styles.title}>🤖 SENTINEL CERBERUS — AI MODE</span>
+          <img src="/CyberSec-Capstone/SentinelCerberus.png" alt="" style={{ height: 28, width: 28, objectFit: "contain", marginRight: 8, verticalAlign: "middle" }} />
+          <span style={styles.title}>SENTINEL CERBERUS — AI MODE</span>
           <span style={styles.epLabel}>Episode <span style={styles.epNum}>{episodes}</span></span>
           <span style={{ ...styles.epLabel, color: C.green }}>Wins <span style={{ fontWeight: 700 }}>{wins}</span></span>
         </div>

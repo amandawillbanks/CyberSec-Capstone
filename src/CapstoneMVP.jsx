@@ -317,7 +317,14 @@ export default function CapstoneMVP() {
                 boxShadow:   aiMode ? "0 0 14px rgba(136,85,255,0.35)" : "none",
               }}
               onClick={toggleAiMode}
-            >🤖 SENTINEL{aiMode ? " ON" : ""}</button>
+            >
+              <img
+                src="/CyberSec-Capstone/SentinelCerberus.png"
+                alt="Sentinel Cerberus"
+                style={{ height: 22, width: 22, objectFit: "contain", verticalAlign: "middle", marginRight: 6, filter: aiMode ? "none" : "grayscale(40%) brightness(0.8)" }}
+              />
+              SENTINEL{aiMode ? " ON" : ""}
+            </button>
           </div>
         </div>
       </header>
