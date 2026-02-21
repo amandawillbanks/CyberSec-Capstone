@@ -361,9 +361,9 @@ export default function CapstoneMVP() {
 
               {/* Role briefing */}
               <div style={styles.introWarning}>
-                ⚠ CRITICAL: 10 global infrastructure nodes are reporting active intrusion events across
-                multiple attack vectors. You are the on-call SOC analyst. Identify the correct defensive
-                responses and contain every host before threat actors achieve persistent access.
+                ⚠ CRITICAL: Intrusion activity has been detected on 2 of 10 global infrastructure nodes. 
+                Additional systems are at risk of compromise. As the on-call SOC analyst, 
+                contain the active threats and secure all 10 systems before adversaries establish persistence..
               </div>
 
               {/* Interface overview */}
@@ -407,10 +407,10 @@ export default function CapstoneMVP() {
               {/* Steps */}
               <div style={styles.introSteps}>
                 {[
-                  ["01", "MONITOR THE GLOBE", "Hosts spawn in waves roughly every 45 seconds. Yellow markers are active threats. Click any marker to select that host and begin responding."],
-                  ["02", "READ ATTACKER INTEL", "The left panel shows the current attack stage, what the attacker is doing right now, and how long until the threat escalates to the next stage."],
-                  ["03", "APPLY DEFENSES", "The right panel lists available mitigations. The correct action for the current stage stabilizes the host and adds bonus time. Wrong choices cost 20 seconds off the escalation clock."],
-                  ["04", "USE THE KNOWLEDGE BASE", "Open it anytime from the header. It explains every attack type, every attacker technique, and why each defense works — but won't tell you which button to press."],
+                  ["-", "MONITOR THE GLOBE", "Hosts spawn in waves roughly every 45 seconds. Yellow markers are active threats. Click any marker to select that host and begin responding."],
+                  ["-", "READ ATTACKER INTEL", "The left panel shows the current attack stage, what the attacker is doing right now, and how long until the threat escalates to the next stage."],
+                  ["-", "APPLY DEFENSES", "The right panel lists available mitigations. The correct action for the current stage stabilizes the host and adds bonus time. Wrong choices cost 20 seconds off the escalation clock."],
+                  ["-", "USE THE KNOWLEDGE BASE", "Open it anytime from the header. It explains every attack type, every attacker technique, and why each defense works — but won't tell you which button to press."],
                 ].map(([num, title, text]) => (
                   <div key={num} style={styles.introStep}>
                     <span style={styles.introStepNum}>{num}</span>
