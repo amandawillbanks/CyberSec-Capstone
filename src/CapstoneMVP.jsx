@@ -165,9 +165,9 @@ export default function CapstoneMVP() {
       const chosenAction = agent.chooseAction(host, availableActions);
       if (!chosenAction) return;
 
-      const isPenalty       = stage.penaltyMitigations?.includes(chosenAction) ?? false;
-      const mitDef          = vuln.mitigations.find(x => x.id === chosenAction);
-      const immediateReward = isPenalty ? -20 : (mitDef?.points ?? 0);
+      const isPenalty = stage.penaltyMitigations?.includes(chosenAction) ?? false;
+      const { pointsAwarded } = applyMitigationPure(hostsRef.current, host.id, chosenAction);
+      const immediateReward = isPenalty ? -20 : pointsAwarded;
 
       // Record for retroactive rewards when host status changes
       lastActionPerHost.current[host.id] = { stateKey, action: chosenAction };
@@ -228,6 +228,13 @@ export default function CapstoneMVP() {
         : 0;
       agent.onEpisodeEnd(gameState === "won", scoreRef.current, durationSec);
       setAiStats({ episodes: agent.episodes, wins: agent.wins, scoreHistory: [...agent.scoreHistory], episodeLog: [...agent.episodeLog], epsilon: agent.epsilon });
+      // Terminal reward: score-scaled bonus/penalty applied to every host's last action
+      const terminalReward = gameState === "won"
+        ? Math.round(scoreRef.current * 0.3)
+        : -Math.round(scoreRef.current * 0.1) - 30;
+      Object.values(lastActionPerHost.current).forEach(({ stateKey, action }) => {
+        agent.updateQ(stateKey, action, terminalReward, stateKey, []);
+      });
       lastActionPerHost.current = {};
       const t = setTimeout(() => start(), 1500);
       return () => clearTimeout(t);
