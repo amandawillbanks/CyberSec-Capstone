@@ -50,16 +50,20 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
   const logRows = [...episodeLog].reverse();
 
   return (
-    <div style={styles.panel}>
+    <div style={styles.outerWrap}>
+      {/* ── Logo sidebar ─────────────────────────────────────────── */}
+      <div style={styles.logoSidebar}>
+        <img
+          src="/CyberSec-Capstone/SentinelCerberus.png"
+          alt="Sentinel Cerberus"
+          style={{ height: 160, width: 160, objectFit: "contain", filter: "drop-shadow(0 0 14px rgba(136,85,255,0.9))" }}
+        />
+      </div>
+
+      {/* ── Main panel ───────────────────────────────────────────── */}
+      <div style={styles.panel}>
       {/* ── Header row ──────────────────────────────────────────── */}
       <div style={styles.header}>
-        <div style={styles.logoContainer}>
-          <img
-            src="/CyberSec-Capstone/SentinelCerberus.png"
-            alt="Sentinel Cerberus"
-            style={{ height: 160, width: 160, objectFit: "contain", filter: "drop-shadow(0 0 14px rgba(136,85,255,0.9))" }}
-          />
-        </div>
         <div style={styles.headerLeft}>
           <span style={styles.title}>SENTINEL CERBERUS — AI MODE</span>
           <span style={styles.epLabel}>Episode <span style={styles.epNum}>{episodes}</span></span>
@@ -196,12 +200,33 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
 
       </div>
     </div>
+    </div>
   );
 }
 
 const styles = {
-  panel: {
+  outerWrap: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "stretch",
     margin: "0 10px 4px",
+    fontFamily: "'Courier New', Consolas, monospace",
+  },
+  logoSidebar: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 180,
+    flexShrink: 0,
+    background: "rgba(136,85,255,0.06)",
+    border: "1px solid rgba(136,85,255,0.3)",
+    borderTop: "3px solid #8855ff",
+    borderRight: "none",
+    boxShadow: "-4px 0 16px rgba(136,85,255,0.08)",
+  },
+  panel: {
+    flex: 1,
     border: "1px solid rgba(136,85,255,0.3)",
     borderTop: "3px solid #8855ff",
     background: "rgba(136,85,255,0.04)",
@@ -217,17 +242,6 @@ const styles = {
     background: "rgba(136,85,255,0.05)",
     flexWrap: "wrap",
     gap: 10,
-  },
-  logoContainer: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    width: 160,
-    height: 160,
-    flexShrink: 0,
-    borderRight: "1px solid rgba(136,85,255,0.18)",
-    background: "rgba(136,85,255,0.06)",
-    marginRight: 12,
   },
   headerLeft: {
     display: "flex",
