@@ -57,7 +57,7 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
           <img
             src="/CyberSec-Capstone/SentinelCerberus.png"
             alt="Sentinel Cerberus"
-            style={{ height: 80, width: 80, objectFit: "contain", marginRight: 8, marginTop: -16, marginBottom: -16, verticalAlign: "middle", filter: "drop-shadow(0 0 6px rgba(136,85,255,0.7))" }}
+            style={{ height: 110, width: 110, objectFit: "contain", marginRight: 8, marginTop: -28, marginBottom: -28, verticalAlign: "middle", filter: "drop-shadow(0 0 10px rgba(136,85,255,0.9))" }}
           />
           <span style={styles.title}>SENTINEL CERBERUS — AI MODE</span>
           <span style={styles.epLabel}>Episode <span style={styles.epNum}>{episodes}</span></span>
@@ -210,7 +210,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "7px 14px",
+    padding: "4px 10px",
     borderBottom: "1px solid rgba(136,85,255,0.18)",
     background: "rgba(136,85,255,0.05)",
     flexWrap: "wrap",
