@@ -56,7 +56,7 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
         <img
           src="/CyberSec-Capstone/SentinelCerberus.png"
           alt="Sentinel Cerberus"
-          style={{ height: 160, width: 160, objectFit: "contain", filter: "drop-shadow(0 0 14px rgba(136,85,255,0.9))" }}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", filter: "drop-shadow(0 0 14px rgba(136,85,255,0.9))" }}
         />
       </div>
 
@@ -219,6 +219,8 @@ const styles = {
     justifyContent: "center",
     width: 180,
     flexShrink: 0,
+    padding: 0,
+    overflow: "hidden",
     background: "rgba(136,85,255,0.06)",
     border: "1px solid rgba(136,85,255,0.3)",
     borderTop: "3px solid #8855ff",
