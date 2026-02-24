@@ -334,7 +334,7 @@ export default function CapstoneMVP() {
               <img
                 src="/CyberSec-Capstone/SentinelCerberus.png"
                 alt="Sentinel Cerberus"
-                style={{ height: 36, width: 36, objectFit: "contain", verticalAlign: "middle", marginRight: 6, filter: aiMode ? "drop-shadow(0 0 6px rgba(136,85,255,0.9))" : "drop-shadow(0 0 4px rgba(136,85,255,0.3))" }}
+                style={{ height: 56, width: 56, objectFit: "contain", verticalAlign: "middle", marginRight: 6, marginTop: -10, marginBottom: -10, filter: aiMode ? "drop-shadow(0 0 6px rgba(136,85,255,0.9))" : "drop-shadow(0 0 4px rgba(136,85,255,0.3))" }}
               />
               SENTINEL{aiMode ? " ON" : ""}
             </button>
