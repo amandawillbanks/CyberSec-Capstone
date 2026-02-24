@@ -476,7 +476,7 @@ export default function CapstoneMVP() {
                     const pending = selectedHost.pendingMitigations?.find((p) => p.id === m.id);
                     const isPending = !!pending;
                     const stage = VULNS[selectedHost.vulnId]?.stages[selectedHost.stageIndex];
-                    const isPenalty = stage?.penaltyMitigations?.includes(m.id);
+                    // const isPenalty = stage?.penaltyMitigations?.includes(m.id); // No longer used for hover
                     const isHovered = hoveredBtn === m.id;
                     const isContained = selectedHost.status === "safe" || selectedHost.status === "quarantined";
                     const disabled = already || isPending || isContained;
@@ -495,19 +495,18 @@ export default function CapstoneMVP() {
                             ? "rgba(0,255,247,0.15)"
                             : isPending
                             ? C.yellow
-                            : isPenalty && isHovered
-                            ? C.red
                             : "rgba(0,255,247,0.5)",
-                          background: isPenalty && isHovered && !already && !isPending
-                            ? "rgba(255,0,60,0.08)"
+                          background: isPending && !already
+                            ? "rgba(0,255,247,0.08)"
                             : "rgba(0,255,247,0.04)",
                         }}
                       >
                         <div style={styles.actionLabel}>
                           {isPending ? `⏳ ${pending.timeLeft}s…` : m.label}
                         </div>
+                        {/* Remove points display, only show apply time */}
                         {!already && !isPending && (
-                          <div style={styles.actionMeta}>+{m.points} pts · {MITIGATION_APPLY_TIMES[m.id] ?? 4}s</div>
+                          <div style={styles.actionMeta}>{MITIGATION_APPLY_TIMES[m.id] ?? 4}s</div>
                         )}
                         {isPending && (
                           <div style={{ ...styles.actionMeta, color: C.yellow }}>applying…</div>
