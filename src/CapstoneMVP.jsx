@@ -323,6 +323,7 @@ export default function CapstoneMVP() {
             <button
               style={{
                 ...styles.kbBtn,
+                padding: "3px 8px",
                 borderColor: aiMode ? "rgba(136,85,255,0.85)" : "rgba(136,85,255,0.4)",
                 background:  aiMode ? "rgba(136,85,255,0.22)" : "rgba(136,85,255,0.06)",
                 color:       aiMode ? "#dd99ff"               : "#bb99ff",
