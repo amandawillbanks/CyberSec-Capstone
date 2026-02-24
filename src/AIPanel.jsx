@@ -53,12 +53,14 @@ export default function AIPanel({ stats, aiSpeed, onSpeedChange, onReset, lastDe
     <div style={styles.panel}>
       {/* ── Header row ──────────────────────────────────────────── */}
       <div style={styles.header}>
-        <div style={styles.headerLeft}>
+        <div style={styles.logoContainer}>
           <img
             src="/CyberSec-Capstone/SentinelCerberus.png"
             alt="Sentinel Cerberus"
-            style={{ height: 110, width: 110, objectFit: "contain", marginRight: 8, marginTop: -28, marginBottom: -28, verticalAlign: "middle", filter: "drop-shadow(0 0 10px rgba(136,85,255,0.9))" }}
+            style={{ height: 160, width: 160, objectFit: "contain", filter: "drop-shadow(0 0 14px rgba(136,85,255,0.9))" }}
           />
+        </div>
+        <div style={styles.headerLeft}>
           <span style={styles.title}>SENTINEL CERBERUS — AI MODE</span>
           <span style={styles.epLabel}>Episode <span style={styles.epNum}>{episodes}</span></span>
           <span style={{ ...styles.epLabel, color: C.green }}>Wins <span style={{ fontWeight: 700 }}>{wins}</span></span>
@@ -216,10 +218,22 @@ const styles = {
     flexWrap: "wrap",
     gap: 10,
   },
+  logoContainer: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 160,
+    height: 160,
+    flexShrink: 0,
+    borderRight: "1px solid rgba(136,85,255,0.18)",
+    background: "rgba(136,85,255,0.06)",
+    marginRight: 12,
+  },
   headerLeft: {
     display: "flex",
     alignItems: "center",
     gap: 16,
+    flex: 1,
   },
   headerRight: {
     display: "flex",
