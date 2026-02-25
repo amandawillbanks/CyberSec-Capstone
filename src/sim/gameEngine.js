@@ -63,16 +63,23 @@ function completeMitigation(h, mitigationId) {
  * Build the initial hosts array.
  */
 export function makeInitialHosts() {
-  return INITIAL_HOSTS.map((h) => ({
+  // Shuffle vuln assignments so each run has different attacks at each location
+  const vulnIds = INITIAL_HOSTS.map(h => h.vulnId);
+  for (let i = vulnIds.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [vulnIds[i], vulnIds[j]] = [vulnIds[j], vulnIds[i]];
+  }
+  return INITIAL_HOSTS.map((h, i) => ({
     ...h,
+    vulnId: vulnIds[i],
     spawned: h.spawnDelaySec === 0,
     spawnCountdown: h.spawnDelaySec,
     status: h.spawnDelaySec === 0 ? "warning" : "pending",
     stageIndex: 0,
-    stageTimeLeft: VULNS[h.vulnId].stages[0].timeLimitSec,
+    stageTimeLeft: VULNS[vulnIds[i]].stages[0].timeLimitSec,
     appliedMitigations: [],
-    pendingMitigations: [],          // { id, timeLeft } — queued but not yet applied
-    penaltyMessage: null,            // contextual explanation when wrong tool is used
+    pendingMitigations: [],
+    penaltyMessage: null,
     lastEvent: h.spawnDelaySec === 0 ? "Alert created" : `Threat incoming in ${h.spawnDelaySec}s`,
   }));
 }
