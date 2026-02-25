@@ -642,23 +642,24 @@ export default function CapstoneMVP() {
         </div>
       )}
 
-      {/* ── Rules overlay ───────────────────────────────────────── */}
+      {/* ── Rules floating panel (non-blocking) ─────────────────── */}
       {showRules && (
-        <div style={styles.rulesOverlay} onClick={() => setShowRules(false)}>
-          <div style={styles.rulesModal} onClick={(e) => e.stopPropagation()}>
-            <div style={styles.rulesModalHeader}>
-              <span style={styles.rulesModalTitle}>▌ OBJECTIVES</span>
-              <button style={styles.rulesClose} onClick={() => setShowRules(false)}>✕</button>
+        <div style={styles.rulesFloat}>
+          <div style={styles.rulesFloatHeader}>
+            <span style={styles.rulesModalTitle}>▌ OBJECTIVES</span>
+            <button style={styles.rulesClose} onClick={() => setShowRules(false)}>✕</button>
+          </div>
+          <div style={styles.rulesFloatBody}>
+            <div style={styles.rulesConditionWin}>
+              <span style={{ color: C.green, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>WIN</span>
+              <span style={{ fontSize: 11, color: "rgba(150,220,180,0.85)" }}>All 10 hosts contained — safe or quarantined</span>
             </div>
-            <div style={styles.rulesModalBody}>
-              <div style={styles.rulesConditionWin}>
-                <span style={{ color: C.green, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>WIN</span>
-                <span style={{ fontSize: 12, color: "rgba(150,220,180,0.85)" }}>All 10 hosts contained — status safe or quarantined</span>
-              </div>
-              <div style={styles.rulesConditionLose}>
-                <span style={{ color: C.red, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>LOSE</span>
-                <span style={{ fontSize: 12, color: "rgba(220,150,150,0.85)" }}>2 or more hosts simultaneously compromised</span>
-              </div>
+            <div style={styles.rulesConditionLose}>
+              <span style={{ color: C.red, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>LOSE</span>
+              <span style={{ fontSize: 11, color: "rgba(220,150,150,0.85)" }}>2+ hosts simultaneously compromised</span>
+            </div>
+            <div style={{ fontSize: 10, color: "rgba(0,255,247,0.35)", marginTop: 4, textAlign: "center", letterSpacing: "0.06em" }}>
+              game continues while open
             </div>
           </div>
         </div>
@@ -851,33 +852,28 @@ const styles = {
     cursor: "pointer",
     fontFamily: "inherit",
   },
-  rulesOverlay: {
+  rulesFloat: {
     position: "fixed",
-    inset: 0,
+    bottom: 60,
+    left: 20,
     zIndex: 500,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "rgba(0,0,0,0.72)",
-    backdropFilter: "blur(4px)",
-  },
-  rulesModal: {
-    width: "min(420px, 90vw)",
+    width: 290,
     border: `1px solid rgba(0,255,247,0.35)`,
     borderTop: `3px solid ${C.cyan}`,
-    background: `linear-gradient(160deg, rgba(0,255,247,0.06) 0%, rgba(6,10,15,0.98) 60%)`,
-    boxShadow: `0 0 40px rgba(0,255,247,0.15)`,
+    background: `linear-gradient(160deg, rgba(0,255,247,0.07) 0%, rgba(6,10,15,0.97) 60%)`,
+    boxShadow: `0 0 28px rgba(0,255,247,0.14), 0 4px 20px rgba(0,0,0,0.7)`,
+    pointerEvents: "auto",
   },
-  rulesModalHeader: {
+  rulesFloatHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "10px 16px",
-    borderBottom: "1px solid rgba(0,255,247,0.18)",
+    padding: "8px 12px",
+    borderBottom: "1px solid rgba(0,255,247,0.15)",
     background: "rgba(0,255,247,0.04)",
   },
   rulesModalTitle: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 700,
     color: C.cyan,
     textTransform: "uppercase",
@@ -892,12 +888,13 @@ const styles = {
     cursor: "pointer",
     lineHeight: 1,
     padding: "0 2px",
+    fontFamily: "inherit",
   },
-  rulesModalBody: {
-    padding: "16px 18px",
+  rulesFloatBody: {
+    padding: "12px 14px",
     display: "flex",
     flexDirection: "column",
-    gap: 10,
+    gap: 8,
   },
   rulesConditionWin: {
     display: "flex",
