@@ -403,6 +403,19 @@ export default function CapstoneMVP() {
               </div>
             </>
           )}
+
+          {/* ── Rules pinned to bottom ── */}
+          <div style={styles.rulesBox}>
+            <div style={{ ...styles.sectionTitle, marginBottom: 6 }}>Objectives</div>
+            <div style={styles.rulesRow}>
+              <span style={{ color: C.green, fontWeight: 700, flexShrink: 0 }}>WIN</span>
+              <span style={{ color: "rgba(150,220,180,0.8)" }}>All 10 hosts safe or quarantined</span>
+            </div>
+            <div style={styles.rulesRow}>
+              <span style={{ color: C.red, fontWeight: 700, flexShrink: 0 }}>LOSE</span>
+              <span style={{ color: "rgba(220,150,150,0.8)" }}>2+ hosts simultaneously compromised</span>
+            </div>
+          </div>
         </div>
 
         {/* Center: Globe */}
@@ -799,12 +812,31 @@ const styles = {
     padding: 10,
   },
   panel: {
+    position: "relative",
     border: `1px solid ${C.border}`,
     borderLeft: `3px solid ${C.cyan}`,
     background: `linear-gradient(135deg, rgba(0,255,247,0.04) 0%, rgba(6,10,15,0.95) 100%)`,
     boxShadow: `0 0 20px rgba(0,255,247,0.06), inset 0 0 30px rgba(0,0,0,0.4)`,
-    padding: "10px 12px",
+    padding: "10px 12px 80px 12px",
     minHeight: 560,
+  },
+  rulesBox: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
+    padding: "8px 12px",
+    borderTop: "1px solid rgba(0,255,247,0.15)",
+    background: "rgba(6,10,15,0.96)",
+  },
+  rulesRow: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: 8,
+    marginBottom: 4,
+    fontSize: 10,
+    letterSpacing: "0.07em",
   },
   panelTitle: {
     fontWeight: 700,
