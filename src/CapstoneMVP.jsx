@@ -26,6 +26,7 @@ export default function CapstoneMVP() {
   const [showIntro, setShowIntro] = useState(true);
   const [lostHosts, setLostHosts] = useState([]);
   const [showDebrief, setShowDebrief] = useState(false);
+  const [showRules, setShowRules] = useState(false);
 
   const tickRef = useRef(null);
   const kbRef = useRef(null);
@@ -404,18 +405,10 @@ export default function CapstoneMVP() {
             </>
           )}
 
-          {/* ── Rules pinned to bottom ── */}
-          <div style={styles.rulesBox}>
-            <div style={{ ...styles.sectionTitle, marginBottom: 6 }}>Objectives</div>
-            <div style={styles.rulesRow}>
-              <span style={{ color: C.green, fontWeight: 700, flexShrink: 0 }}>WIN</span>
-              <span style={{ color: "rgba(150,220,180,0.8)" }}>All 10 hosts safe or quarantined</span>
-            </div>
-            <div style={styles.rulesRow}>
-              <span style={{ color: C.red, fontWeight: 700, flexShrink: 0 }}>LOSE</span>
-              <span style={{ color: "rgba(220,150,150,0.8)" }}>2+ hosts simultaneously compromised</span>
-            </div>
-          </div>
+          {/* ── Rules button pinned to bottom ── */}
+          <button style={styles.rulesBtn} onClick={() => setShowRules(true)}>
+            📋 OBJECTIVES
+          </button>
         </div>
 
         {/* Center: Globe */}
@@ -649,6 +642,28 @@ export default function CapstoneMVP() {
         </div>
       )}
 
+      {/* ── Rules overlay ───────────────────────────────────────── */}
+      {showRules && (
+        <div style={styles.rulesOverlay} onClick={() => setShowRules(false)}>
+          <div style={styles.rulesModal} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.rulesModalHeader}>
+              <span style={styles.rulesModalTitle}>▌ OBJECTIVES</span>
+              <button style={styles.rulesClose} onClick={() => setShowRules(false)}>✕</button>
+            </div>
+            <div style={styles.rulesModalBody}>
+              <div style={styles.rulesConditionWin}>
+                <span style={{ color: C.green, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>WIN</span>
+                <span style={{ fontSize: 12, color: "rgba(150,220,180,0.85)" }}>All 10 hosts contained — status safe or quarantined</span>
+              </div>
+              <div style={styles.rulesConditionLose}>
+                <span style={{ color: C.red, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>LOSE</span>
+                <span style={{ fontSize: 12, color: "rgba(220,150,150,0.85)" }}>2 or more hosts simultaneously compromised</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── Loss debrief modal ──────────────────────────────────── */}
       {gameState === "lost" && showDebrief && lostHosts.length > 0 && (
         <div style={styles.introOverlay}>
@@ -817,26 +832,90 @@ const styles = {
     borderLeft: `3px solid ${C.cyan}`,
     background: `linear-gradient(135deg, rgba(0,255,247,0.04) 0%, rgba(6,10,15,0.95) 100%)`,
     boxShadow: `0 0 20px rgba(0,255,247,0.06), inset 0 0 30px rgba(0,0,0,0.4)`,
-    padding: "10px 12px 80px 12px",
+    padding: "10px 12px 48px 12px",
     minHeight: 560,
   },
-  rulesBox: {
+  rulesBtn: {
     position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
-    padding: "8px 12px",
-    borderTop: "1px solid rgba(0,255,247,0.15)",
-    background: "rgba(6,10,15,0.96)",
-  },
-  rulesRow: {
-    display: "flex",
-    alignItems: "baseline",
-    gap: 8,
-    marginBottom: 4,
+    bottom: 10,
+    left: 12,
+    right: 12,
+    padding: "6px 10px",
+    border: "1px solid rgba(0,255,247,0.25)",
+    background: "rgba(0,255,247,0.05)",
+    color: "rgba(0,255,247,0.7)",
     fontSize: 10,
-    letterSpacing: "0.07em",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.12em",
+    cursor: "pointer",
+    fontFamily: "inherit",
+  },
+  rulesOverlay: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 500,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "rgba(0,0,0,0.72)",
+    backdropFilter: "blur(4px)",
+  },
+  rulesModal: {
+    width: "min(420px, 90vw)",
+    border: `1px solid rgba(0,255,247,0.35)`,
+    borderTop: `3px solid ${C.cyan}`,
+    background: `linear-gradient(160deg, rgba(0,255,247,0.06) 0%, rgba(6,10,15,0.98) 60%)`,
+    boxShadow: `0 0 40px rgba(0,255,247,0.15)`,
+  },
+  rulesModalHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "10px 16px",
+    borderBottom: "1px solid rgba(0,255,247,0.18)",
+    background: "rgba(0,255,247,0.04)",
+  },
+  rulesModalTitle: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: C.cyan,
+    textTransform: "uppercase",
+    letterSpacing: "0.18em",
+    textShadow: `0 0 10px rgba(0,255,247,0.5)`,
+  },
+  rulesClose: {
+    background: "none",
+    border: "none",
+    color: "rgba(0,255,247,0.5)",
+    fontSize: 14,
+    cursor: "pointer",
+    lineHeight: 1,
+    padding: "0 2px",
+  },
+  rulesModalBody: {
+    padding: "16px 18px",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
+  },
+  rulesConditionWin: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "10px 14px",
+    border: "1px solid rgba(0,255,136,0.2)",
+    borderLeft: "3px solid rgba(0,255,136,0.6)",
+    background: "rgba(0,255,136,0.04)",
+  },
+  rulesConditionLose: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+    padding: "10px 14px",
+    border: "1px solid rgba(255,0,60,0.2)",
+    borderLeft: "3px solid rgba(255,0,60,0.6)",
+    background: "rgba(255,0,60,0.04)",
   },
   panelTitle: {
     fontWeight: 700,
