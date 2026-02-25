@@ -26,7 +26,6 @@ export default function CapstoneMVP() {
   const [showIntro, setShowIntro] = useState(true);
   const [lostHosts, setLostHosts] = useState([]);
   const [showDebrief, setShowDebrief] = useState(false);
-  const [showRules, setShowRules] = useState(false);
 
   const tickRef = useRef(null);
   const kbRef = useRef(null);
@@ -406,7 +405,7 @@ export default function CapstoneMVP() {
           )}
 
           {/* ── Rules button pinned to bottom ── */}
-          <button style={styles.rulesBtn} onClick={() => setShowRules(true)}>
+          <button style={styles.rulesBtn} onClick={() => setShowIntro(true)}>
             📋 OBJECTIVES
           </button>
         </div>
@@ -552,8 +551,13 @@ export default function CapstoneMVP() {
           <div style={{ ...styles.introBox, width: "min(700px, 95vw)", maxHeight: "90vh", overflowY: "auto" }}>
             <div style={styles.introHeader}>
               <span style={styles.introBlink}>▌</span>
-              <span style={styles.introHeaderText}>SYSTEM ALERT — INCOMING THREAT DETECTION</span>
-              <span style={styles.introBlink}>▌</span>
+              <span style={styles.introHeaderText}>
+                {gameState === "ready" ? "SYSTEM ALERT — INCOMING THREAT DETECTION" : "MISSION REFERENCE GUIDE"}
+              </span>
+              {gameState !== "ready" && (
+                <button style={styles.rulesClose} onClick={() => setShowIntro(false)}>✕</button>
+              )}
+              {gameState === "ready" && <span style={styles.introBlink}>▌</span>}
             </div>
             <div style={styles.introBody}>
 
@@ -634,32 +638,9 @@ export default function CapstoneMVP() {
 
               <div style={styles.introFooter}>
                 <button style={styles.introBtn} onClick={() => setShowIntro(false)}>
-                  ▶ ACKNOWLEDGE &amp; ENTER OPERATIONS CENTER
+                  {gameState === "ready" ? "▶ ACKNOWLEDGE & ENTER OPERATIONS CENTER" : "✕ CLOSE REFERENCE"}
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Rules floating panel (non-blocking) ─────────────────── */}
-      {showRules && (
-        <div style={styles.rulesFloat}>
-          <div style={styles.rulesFloatHeader}>
-            <span style={styles.rulesModalTitle}>▌ OBJECTIVES</span>
-            <button style={styles.rulesClose} onClick={() => setShowRules(false)}>✕</button>
-          </div>
-          <div style={styles.rulesFloatBody}>
-            <div style={styles.rulesConditionWin}>
-              <span style={{ color: C.green, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>WIN</span>
-              <span style={{ fontSize: 11, color: "rgba(150,220,180,0.85)" }}>All 10 hosts contained — safe or quarantined</span>
-            </div>
-            <div style={styles.rulesConditionLose}>
-              <span style={{ color: C.red, fontWeight: 700, fontSize: 11, letterSpacing: "0.12em", flexShrink: 0 }}>LOSE</span>
-              <span style={{ fontSize: 11, color: "rgba(220,150,150,0.85)" }}>2+ hosts simultaneously compromised</span>
-            </div>
-            <div style={{ fontSize: 10, color: "rgba(0,255,247,0.35)", marginTop: 4, textAlign: "center", letterSpacing: "0.06em" }}>
-              game continues while open
             </div>
           </div>
         </div>
@@ -852,67 +833,15 @@ const styles = {
     cursor: "pointer",
     fontFamily: "inherit",
   },
-  rulesFloat: {
-    position: "fixed",
-    bottom: 60,
-    left: 20,
-    zIndex: 500,
-    width: 290,
-    border: `1px solid rgba(0,255,247,0.35)`,
-    borderTop: `3px solid ${C.cyan}`,
-    background: `linear-gradient(160deg, rgba(0,255,247,0.07) 0%, rgba(6,10,15,0.97) 60%)`,
-    boxShadow: `0 0 28px rgba(0,255,247,0.14), 0 4px 20px rgba(0,0,0,0.7)`,
-    pointerEvents: "auto",
-  },
-  rulesFloatHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "8px 12px",
-    borderBottom: "1px solid rgba(0,255,247,0.15)",
-    background: "rgba(0,255,247,0.04)",
-  },
-  rulesModalTitle: {
-    fontSize: 10,
-    fontWeight: 700,
-    color: C.cyan,
-    textTransform: "uppercase",
-    letterSpacing: "0.18em",
-    textShadow: `0 0 10px rgba(0,255,247,0.5)`,
-  },
   rulesClose: {
     background: "none",
     border: "none",
     color: "rgba(0,255,247,0.5)",
-    fontSize: 14,
+    fontSize: 16,
     cursor: "pointer",
     lineHeight: 1,
     padding: "0 2px",
     fontFamily: "inherit",
-  },
-  rulesFloatBody: {
-    padding: "12px 14px",
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-  },
-  rulesConditionWin: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "10px 14px",
-    border: "1px solid rgba(0,255,136,0.2)",
-    borderLeft: "3px solid rgba(0,255,136,0.6)",
-    background: "rgba(0,255,136,0.04)",
-  },
-  rulesConditionLose: {
-    display: "flex",
-    alignItems: "center",
-    gap: 12,
-    padding: "10px 14px",
-    border: "1px solid rgba(255,0,60,0.2)",
-    borderLeft: "3px solid rgba(255,0,60,0.6)",
-    background: "rgba(255,0,60,0.04)",
   },
   panelTitle: {
     fontWeight: 700,
